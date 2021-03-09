@@ -1,0 +1,17 @@
+{
+  "name": "github-grep",
+  "version": "0.0.1",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "author": "Alex Navasardyan <alex.navasardyan@gmail.com>",
+  "license": "MIT",
+  "scripts": {
+    "build": "tsc",
+    "dev": "yarn build --watch --preserveWatchOutput",
+    "lint": "eslint src --ext js,ts",
+    "test": "jest"
+  },
+  "devDependencies": {
+    "typescript": "^4.2.3"
+  }
+}
