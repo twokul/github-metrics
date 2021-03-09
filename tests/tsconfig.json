@@ -1,0 +1,18 @@
+{
+  "extends": "../tsconfig.json",
+  "references": [
+    {
+      "name": "github-grep",
+      "path": ".."
+    }
+  ],
+  "compilerOptions": {
+    "types": [
+      "jest"
+    ],
+    "rootDir": ".."
+  },
+  "include": [
+    "."
+  ]
+}
