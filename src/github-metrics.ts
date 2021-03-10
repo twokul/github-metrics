@@ -2,29 +2,22 @@
  * @packageDocumentation A small library to fetch aggregated information from Github.
  */
 
-type Report = {
-  name: string;
-  openPullRequests: number;
-  closedPullRequests: number;
-  mergedPullRequests: number;
-  averageTimeToMerge: number;
-  averageIdleTime: number;
-  aggregatedReviewDepth: {
-    comments: number;
-    reviews: number,
-    reviewers: number,
-  };
-  hotfixes: number;
-}
+import GithubClient from "./github-client";
+import RepositoryReport from './reports/repository';
 
 export default class GithubMetrics {
-  constructor({ token }: { token: string }) {
+  #githubClient;
 
+  constructor({ token }: { token: string }) {
+    this.#githubClient = new GithubClient({ token });
   }
 
-  async generateDailyReport({ owner, repo }: { owner: string; repo: string }): Promise<Report> {
-    return Promise.resolve({
-      aggregatedReviewDepth: {},
-    } as Report);
+  async generateDailyReport({ owner, repo }: { owner: string; repo: string }): Promise<RepositoryReport> {
+    const pullRequests = await this.#githubClient.getPullRequestsByPeriod({
+      owner,
+      repo,
+    });
+
+    return new RepositoryReport({ pullRequests, owner, repo });
   }
 }
