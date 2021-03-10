@@ -7,15 +7,18 @@ runs:
   main: "dist/index.js"
 
 inputs:
+  github-owner:
+    required: true
+    description: 'Github Organisation Name'
+  github-repo:
+    required: true
+    description: 'Github Repository Name'
   github-token:
     required: true
     description: 'Github API token to connect to Github'
-  slack-app-client-id:
+  slack-app-token:
     required: true
-    description: 'Slack Application Client Id'
-  slack-app-client-secret:
+    description: 'Slack Application Token'
+  slack-channel-id:
     required: true
-    description: 'Slack Application Client Secret'
-  slack-channel:
-    required: true
-    description: 'Slack Channel'
+    description: 'Slack Channel Id'
