@@ -1,9 +1,9 @@
-import GithubGrep from '..';
+import GithubMetrics from '..';
 
 describe('it works', () => {
   test('three positive numbers', () => {
-    const gg = new GithubGrep();
+    const gm = new GithubMetrics();
 
-    expect(gg).toBeDefined();
+    expect(gm).toBeDefined();
   });
 });

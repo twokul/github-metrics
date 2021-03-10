@@ -8,5 +8,5 @@
 
 |  Package | Description |
 |  --- | --- |
-|  [github-grep](./github-grep.md) | A small library to fetch aggregated information from Github. |
+|  [github-metrics](./github-metrics.md) | A small library to fetch aggregated information from Github. |
 

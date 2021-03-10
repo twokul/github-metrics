@@ -1,0 +1,21 @@
+name: "Metrics"
+
+description: "Post Pull Request Metrics on Slack"
+
+runs:
+  using: "node14"
+  main: "dist/index.js"
+
+inputs:
+  github-token:
+    required: true
+    description: 'Github API token to connect to Github'
+  slack-app-client-id:
+    required: true
+    description: 'Slack Application Client Id'
+  slack-app-client-secret:
+    required: true
+    description: 'Slack Application Client Secret'
+  slack-channel:
+    required: true
+    description: 'Slack Channel'

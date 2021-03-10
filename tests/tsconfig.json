@@ -2,7 +2,7 @@
   "extends": "../tsconfig.json",
   "references": [
     {
-      "name": "github-grep",
+      "name": "github-metrics",
       "path": ".."
     }
   ],
