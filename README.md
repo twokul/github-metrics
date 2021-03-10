@@ -1,4 +1,4 @@
-# Github Grep
+# Github Metrics
 
 ## Development
 
