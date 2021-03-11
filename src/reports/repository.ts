@@ -36,7 +36,11 @@ export default class RepositoryReport {
     return hotfixes.length;
   }
 
-  get averageTimeToMerge(): number {
+  get averageTimeToMerge(): number | null {
+    if (this.#pullRequests.length === 0) {
+      return null;
+    }
+
     const totalTimeToMerge = this.#pullRequests
       .map((pullRequest) => {
         const analysis = new PullRequestReport(pullRequest);
@@ -70,7 +74,11 @@ export default class RepositoryReport {
     return reviewDepth;
   }
 
-  get averageIdleTime(): number {
+  get averageIdleTime(): number | null {
+    if (this.#pullRequests.length === 0) {
+      return null;
+    }
+
     const totalIdleTime = this.#pullRequests
       .map((pullRequest) => {
         const analysis = new PullRequestReport(pullRequest);
