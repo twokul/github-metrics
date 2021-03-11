@@ -1,5 +1,5 @@
 import { PullRequest, PullRequestState } from '../github-client';
-import PullRequestAnalysis, { PullRequestReviewDepth } from './pull-request';
+import PullRequestReport, { PullRequestReviewDepth } from './pull-request';
 
 export default class RepositoryReport {
   #owner;
@@ -31,7 +31,7 @@ export default class RepositoryReport {
   }
 
   get hotfixes(): number {
-    const hotfixes = this.#pullRequests.map((pr) => new PullRequestAnalysis(pr)).filter((pr) => pr.isHotfix);
+    const hotfixes = this.#pullRequests.map((pr) => new PullRequestReport(pr)).filter((pr) => pr.isHotfix);
 
     return hotfixes.length;
   }
@@ -39,7 +39,7 @@ export default class RepositoryReport {
   get averageTimeToMerge(): number {
     const totalTimeToMerge = this.#pullRequests
       .map((pullRequest) => {
-        const analysis = new PullRequestAnalysis(pullRequest);
+        const analysis = new PullRequestReport(pullRequest);
 
         return Number(analysis.timeToMerge.toFormat('h'));
       })
@@ -57,7 +57,7 @@ export default class RepositoryReport {
 
     this.#pullRequests
       .map((pullRequest) => {
-        const analysis = new PullRequestAnalysis(pullRequest);
+        const analysis = new PullRequestReport(pullRequest);
 
         return analysis.reviewDepth;
       })
@@ -73,7 +73,7 @@ export default class RepositoryReport {
   get averageIdleTime(): number {
     const totalIdleTime = this.#pullRequests
       .map((pullRequest) => {
-        const analysis = new PullRequestAnalysis(pullRequest);
+        const analysis = new PullRequestReport(pullRequest);
 
         return Number(analysis.idleTime.toFormat('h'));
       })

@@ -7,7 +7,7 @@ export type PullRequestReviewDepth = {
   reviewers: number;
 };
 
-export default class PullRequestAnalysis {
+export default class PullRequestReport {
   #pullRequest;
 
   constructor(pullRequest: PullRequest) {
