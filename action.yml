@@ -3,6 +3,7 @@ name: "Github Metrics"
 description: "Post Pull Request Metrics on Slack"
 
 runs:
+  # highest available version
   using: "node12"
   main: "dist/index.js"
 
