@@ -1,7 +1,8 @@
-// import { PullRequest } from '../../src/github-client';
+import { PullRequest } from '../../src/github-client';
 import RepositoryReport from '../../src/reports/repository';
 import * as td from 'testdouble';
 import { DateTime } from 'luxon';
+import PRS_THIS_WEEK from '../fixtures/prs-this-week';
 
 describe('Repository Report', () => {
   beforeAll(() => {
@@ -15,7 +16,7 @@ describe('Repository Report', () => {
   test('it generates correct report given an empty list of pull requests', () => {
     const owner = 'Marvel';
     const repo = 'Avengers';
-    const pullRequests = [];
+    const pullRequests = [] as Array<PullRequest>;
     const report = new RepositoryReport({ pullRequests, owner, repo });
 
     expect(report.name).toEqual('Marvel/Avengers');
@@ -23,12 +24,37 @@ describe('Repository Report', () => {
     expect(report.closedPullRequests).toEqual([]);
     expect(report.mergedPullRequests).toEqual([]);
     expect(report.hotfixes).toEqual(0);
-    expect(report.averageIdleTime).toEqual(null);
-    expect(report.averageTimeToMerge).toEqual(null);
+    expect(report.url).toEqual('');
+    expect(report.averageIdleTime).toEqual(0);
+    expect(report.averageTimeToMerge).toEqual(0);
     expect(report.aggregatedReviewDepth).toEqual({
       comments: 0,
       reviews: 0,
       reviewers: 0,
+    });
+  });
+
+  test('it generates correct report given a list of pull requests', () => {
+    const owner = 'Marvel';
+    const repo = 'Avengers';
+    const pullRequests = PRS_THIS_WEEK.search.edges.map((edge) => {
+      return new PullRequest(edge.node);
+    });
+
+    const report = new RepositoryReport({ pullRequests, owner, repo });
+
+    expect(report.name).toEqual('Marvel/Avengers');
+    expect(report.openedPullRequests.length).toEqual(15);
+    expect(report.closedPullRequests.length).toEqual(19);
+    expect(report.mergedPullRequests.length).toEqual(14);
+    expect(report.hotfixes).toEqual(0);
+    expect(report.url).toEqual('');
+    expect(report.averageIdleTime).toEqual(10.5);
+    expect(report.averageTimeToMerge).toEqual(16.458333333333332);
+    expect(report.aggregatedReviewDepth).toEqual({
+      comments: 0,
+      reviews: 51,
+      reviewers: 32,
     });
   });
 });

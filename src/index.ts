@@ -1,7 +1,7 @@
-import * as core from "@actions/core";
-import GithubMetrics from "./github-metrics";
-import { WebClient } from "@slack/web-api";
-import { constructDailyGithubMetricsSlackMessage } from "./format-utils";
+import * as core from '@actions/core';
+import GithubMetrics from './github-metrics';
+import { WebClient } from '@slack/web-api';
+import { constructSlackMessage } from './utils/slack';
 
 export async function run({
   githubOwner,
@@ -21,24 +21,47 @@ export async function run({
     const githubMetrics = new GithubMetrics({
       token: githubToken,
     });
-    const dailyReport = await githubMetrics.generateDailyReport({
+    const weeklyReport = await githubMetrics.generateWeeklyReport({
       owner: githubOwner,
       repo: githubRepo,
     });
 
-    const message = constructDailyGithubMetricsSlackMessage({
-      text: "Hello world!",
+    const message = constructSlackMessage({
+      header: `Weekly Metrics for ${weeklyReport.name} (${weeklyReport.startDate} - ${weeklyReport.endDate}) 📈`,
+      footer:
+        '_This is an automated post by <https://git.io/JqZ6w|github-metrics>._',
+      sections: [
+        {
+          text: `Number Of Pull Requests Opened: *${weeklyReport.openedPullRequests.length}*`,
+        },
+        {
+          text: `Number Of Pull Requests Merged: *${weeklyReport.mergedPullRequests.length}*`,
+        },
+        {
+          text: `Number Of Pull Requests Closed: *${weeklyReport.closedPullRequests.length}*`,
+        },
+        {
+          text: `Average Time To Merge: *${
+            weeklyReport.averageTimeToMerge
+              ? weeklyReport.averageTimeToMerge.toFixed(1)
+              : null
+          } hours*`,
+        },
+        {
+          text: `Average Pull Request Idle Time: *${
+            weeklyReport.averageIdleTime
+              ? weeklyReport.averageIdleTime.toFixed(1)
+              : null
+          } hours*`,
+        },
+        {
+          text: `Review Depth: *${weeklyReport.aggregatedReviewDepth.comments} comments, ${weeklyReport.aggregatedReviewDepth.reviews} reviews by ${weeklyReport.aggregatedReviewDepth.reviewers} people*`,
+        },
+        {
+          text: `Number Of Hotfixes: *${weeklyReport.hotfixes}*`,
+        },
+      ],
       channel: slackChannelId,
-      content: {
-        repoName: dailyReport.name,
-        openPullRequests: dailyReport.openedPullRequests.length,
-        closedPullRequests: dailyReport.closedPullRequests.length,
-        mergedPullRequests: dailyReport.mergedPullRequests.length,
-        averageIdleTime: Number(dailyReport.averageIdleTime.toFixed(1)),
-        averageTimeToMerge: Number(dailyReport.averageTimeToMerge.toFixed(1)),
-        aggregatedReviewDepth: dailyReport.aggregatedReviewDepth,
-        hotfixes: dailyReport.hotfixes,
-      },
     });
     const result = await slack.chat.postMessage(message);
 
@@ -50,13 +73,13 @@ export async function run({
   }
 }
 
-const githubOwner = process.env.GITHUB_OWNER || core.getInput("github-owner");
-const githubRepo = process.env.GITHUB_REPO || core.getInput("github-repo");
-const githubToken = process.env.GITHUB_TOKEN || core.getInput("github-token");
+const githubOwner = process.env.GITHUB_OWNER || core.getInput('github-owner');
+const githubRepo = process.env.GITHUB_REPO || core.getInput('github-repo');
+const githubToken = process.env.GITHUB_TOKEN || core.getInput('github-token');
 const slackChannelId =
-  process.env.SLACK_CHANNEL_ID || core.getInput("slack-channel-id");
+  process.env.SLACK_CHANNEL_ID || core.getInput('slack-channel-id');
 const slackAppToken =
-  process.env.SLACK_APP_TOKEN || core.getInput("slack-app-token");
+  process.env.SLACK_APP_TOKEN || core.getInput('slack-app-token');
 
 run({
   githubOwner,

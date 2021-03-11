@@ -8,7 +8,15 @@ export default class RepositoryReport {
 
   #pullRequests;
 
-  constructor({ owner, repo, pullRequests }: { owner: string, repo: string, pullRequests: Array<PullRequest> }) {
+  constructor({
+    owner,
+    repo,
+    pullRequests,
+  }: {
+    owner: string;
+    repo: string;
+    pullRequests: Array<PullRequest>;
+  }) {
     this.#owner = owner;
     this.#repo = repo;
     this.#pullRequests = pullRequests;
@@ -18,27 +26,47 @@ export default class RepositoryReport {
     return `${this.#owner}/${this.#repo}`;
   }
 
+  get url(): string {
+    return '';
+  }
+
+  get startDate(): string {
+    return '';
+  }
+
+  get endDate(): string {
+    return '';
+  }
+
   get openedPullRequests(): Array<PullRequest> {
-    return this.#pullRequests.filter((pr) => pr.state === PullRequestState.OPENED);
+    return this.#pullRequests.filter(
+      (pr) => pr.state === PullRequestState.OPENED
+    );
   }
 
   get closedPullRequests(): Array<PullRequest> {
-    return this.#pullRequests.filter((pr) => pr.state === PullRequestState.CLOSED);
+    return this.#pullRequests.filter(
+      (pr) => pr.state === PullRequestState.CLOSED
+    );
   }
 
   get mergedPullRequests(): Array<PullRequest> {
-    return this.#pullRequests.filter((pr) => pr.state === PullRequestState.MERGED);
+    return this.#pullRequests.filter(
+      (pr) => pr.state === PullRequestState.MERGED
+    );
   }
 
   get hotfixes(): number {
-    const hotfixes = this.#pullRequests.map((pr) => new PullRequestReport(pr)).filter((pr) => pr.isHotfix);
+    const hotfixes = this.#pullRequests
+      .map((pr) => new PullRequestReport(pr))
+      .filter((pr) => pr.isHotfix);
 
     return hotfixes.length;
   }
 
-  get averageTimeToMerge(): number | null {
+  get averageTimeToMerge(): number {
     if (this.#pullRequests.length === 0) {
-      return null;
+      return 0;
     }
 
     const totalTimeToMerge = this.#pullRequests
@@ -74,9 +102,9 @@ export default class RepositoryReport {
     return reviewDepth;
   }
 
-  get averageIdleTime(): number | null {
+  get averageIdleTime(): number {
     if (this.#pullRequests.length === 0) {
-      return null;
+      return 0;
     }
 
     const totalIdleTime = this.#pullRequests

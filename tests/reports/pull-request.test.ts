@@ -16,7 +16,9 @@ describe('Pull Request Report', () => {
   afterAll(() => td.reset());
 
   test('it generates correct report for a merged PR', () => {
-    const pullRequest = new PullRequest(MERGED_PULL_REQUEST.repository.pullRequest);
+    const pullRequest = new PullRequest(
+      MERGED_PULL_REQUEST.repository.pullRequest
+    );
     const pullRequestReport = new PullRequestReport(pullRequest);
 
     expect(pullRequestReport).toBeDefined();
@@ -50,7 +52,9 @@ describe('Pull Request Report', () => {
   });
 
   test('it generates correct report for an opened PR with reviews', () => {
-    const pullRequest = new PullRequest(OPEN_WITH_REVIEWS.repository.pullRequest);
+    const pullRequest = new PullRequest(
+      OPEN_WITH_REVIEWS.repository.pullRequest
+    );
     const pullRequestReport = new PullRequestReport(pullRequest);
 
     expect(pullRequestReport).toBeDefined();

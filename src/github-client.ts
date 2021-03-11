@@ -1,11 +1,4 @@
 import { graphql } from '@octokit/graphql';
-import { DateTime } from 'luxon';
-
-export enum AnalysisPeriod {
-  DAY = 'day',
-  WEEK = 'week',
-  MONTH = 'month',
-}
 
 type PullRequestReview = {
   submittedAt: string;
@@ -29,7 +22,7 @@ export class PullRequest {
 
   number: number;
 
-  mergedAt: string;
+  mergedAt: string | null;
 
   createdAt: string;
 
@@ -38,7 +31,7 @@ export class PullRequest {
   reviews: Array<PullRequestReview>;
 
   constructor(pullRequest: {
-    mergedAt: string;
+    mergedAt: string | null;
     number: number;
     createdAt: string;
     title: string;
@@ -65,7 +58,14 @@ export class PullRequest {
       }>;
     };
   }) {
-    const { mergedAt, number, createdAt, title, state, baseRefName } = pullRequest;
+    const {
+      mergedAt,
+      number,
+      createdAt,
+      title,
+      state,
+      baseRefName,
+    } = pullRequest;
     const reviews = pullRequest.reviews.edges.map((edge) => {
       return {
         submittedAt: edge.node.submittedAt,
@@ -93,7 +93,7 @@ export class PullRequest {
 export default class GithubClient {
   #graphql;
 
-  constructor({ token }: { token: string; }) {
+  constructor({ token }: { token: string }) {
     this.#graphql = graphql.defaults({
       headers: {
         authorization: `token ${token}`,
@@ -101,7 +101,15 @@ export default class GithubClient {
     });
   }
 
-  async getPullRequest({ owner, repo, pullRequestNumber }: { owner: string; repo: string; pullRequestNumber: number }): Promise<PullRequest> {
+  async getPullRequest({
+    owner,
+    repo,
+    pullRequestNumber,
+  }: {
+    owner: string;
+    repo: string;
+    pullRequestNumber: number;
+  }): Promise<PullRequest> {
     const response: {
       repository: {
         pullRequest: any;
@@ -146,36 +154,26 @@ export default class GithubClient {
     return new PullRequest(response.repository.pullRequest);
   }
 
-  async getPullRequestsByPeriod({ owner, repo, period = AnalysisPeriod.DAY, limit = 50 }: { owner: string; repo: string; period?: AnalysisPeriod; limit?: number }): Promise<Array<PullRequest>> {
-    const now = DateTime.now();
-    const today = now;
-    const thisWeek = DateTime.fromObject({ weekNumber: now.weekNumber });
-    const thisMonth = DateTime.fromObject({ month: now.month });
-    let start = '';
-    let end = '';
-
-    switch (period) {
-      case AnalysisPeriod.DAY:
-        start = today.toFormat('yyyy-MM-dd');
-        end = today.endOf('day').toString();
-        break;
-      case AnalysisPeriod.WEEK:
-        start = thisWeek.toFormat('yyyy-MM-dd');
-        end = thisWeek.endOf('week').toString();
-        break;
-      case AnalysisPeriod.MONTH:
-        start = thisMonth.toFormat('yyyy-MM-dd');
-        end = thisMonth.endOf('month').toString();
-        break;
-    }
-
+  async getPullRequestsByPeriod({
+    owner,
+    repo,
+    limit = 50,
+    startDate,
+    endDate,
+  }: {
+    owner: string;
+    repo: string;
+    limit?: number;
+    startDate: string;
+    endDate: string;
+  }): Promise<Array<PullRequest>> {
     const response: {
       search: {
         edges: Array<any>;
       };
     } = await this.#graphql(`
       {
-        search(query: "repo:${owner}/${repo} created:${start}..${end}", type: ISSUE, last: ${limit}) {
+        search(query: "repo:${owner}/${repo} created:${startDate}..${endDate}", type: ISSUE, last: ${limit}) {
           edges {
             node {
               ... on PullRequest {

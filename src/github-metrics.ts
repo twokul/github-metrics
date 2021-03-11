@@ -1,9 +1,6 @@
-/**
- * @packageDocumentation A small library to fetch aggregated information from Github.
- */
-
-import GithubClient from "./github-client";
+import GithubClient from './github-client';
 import RepositoryReport from './reports/repository';
+import { generateDateRange, Period } from './utils/date';
 
 export default class GithubMetrics {
   #githubClient;
@@ -12,10 +9,37 @@ export default class GithubMetrics {
     this.#githubClient = new GithubClient({ token });
   }
 
-  async generateDailyReport({ owner, repo }: { owner: string; repo: string }): Promise<RepositoryReport> {
+  async generateDailyReport({
+    owner,
+    repo,
+  }: {
+    owner: string;
+    repo: string;
+  }): Promise<RepositoryReport> {
+    const { startDate, endDate } = generateDateRange();
     const pullRequests = await this.#githubClient.getPullRequestsByPeriod({
       owner,
       repo,
+      startDate,
+      endDate,
+    });
+
+    return new RepositoryReport({ pullRequests, owner, repo });
+  }
+
+  async generateWeeklyReport({
+    owner,
+    repo,
+  }: {
+    owner: string;
+    repo: string;
+  }): Promise<RepositoryReport> {
+    const { startDate, endDate } = generateDateRange(Period.WEEK);
+    const pullRequests = await this.#githubClient.getPullRequestsByPeriod({
+      owner,
+      repo,
+      startDate,
+      endDate,
     });
 
     return new RepositoryReport({ pullRequests, owner, repo });

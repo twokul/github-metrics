@@ -25,7 +25,9 @@ export default class PullRequestReport {
   get idleTime(): Duration {
     const createdAt = this.#pullRequest.createdAt;
     const submittedAt =
-      this.#pullRequest.reviews.length === 0 ? DateTime.now().toString() : this.#pullRequest.reviews[0].submittedAt;
+      this.#pullRequest.reviews.length === 0
+        ? DateTime.now().toString()
+        : this.#pullRequest.reviews[0].submittedAt;
     const createdAtDateTime = DateTime.fromISO(createdAt);
     const submittedAtDateTime = DateTime.fromISO(submittedAt);
 
@@ -40,7 +42,9 @@ export default class PullRequestReport {
     const createdAt = this.#pullRequest.createdAt;
     const mergedAt = this.#pullRequest.mergedAt;
     const createdAtDateTime = DateTime.fromISO(createdAt);
-    const mergedAtDateTime = mergedAt ? DateTime.fromISO(mergedAt) : DateTime.now();
+    const mergedAtDateTime = mergedAt
+      ? DateTime.fromISO(mergedAt)
+      : DateTime.now();
 
     return mergedAtDateTime.diff(createdAtDateTime);
   }
@@ -48,7 +52,9 @@ export default class PullRequestReport {
   get reviewDepth(): PullRequestReviewDepth {
     const reviewers = new Set();
 
-    this.#pullRequest.reviews.forEach((pullRequestReview) => reviewers.add(pullRequestReview.author));
+    this.#pullRequest.reviews.forEach((pullRequestReview) =>
+      reviewers.add(pullRequestReview.author)
+    );
 
     return {
       comments: this.#pullRequest.comments.length,
