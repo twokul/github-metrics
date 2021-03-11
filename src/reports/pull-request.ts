@@ -47,7 +47,7 @@ export default class PullRequestReport {
 
   get reviewDepth(): PullRequestReviewDepth {
     const reviewers = new Set();
-    this.#pullRequest.comments.forEach((comment) => reviewers.add(comment.author));
+
     this.#pullRequest.reviews.forEach((pullRequestReview) => reviewers.add(pullRequestReview.author));
 
     return {

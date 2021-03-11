@@ -3,7 +3,7 @@ import GithubMetrics from "./github-metrics";
 import { WebClient } from "@slack/web-api";
 import { constructDailyGithubMetricsSlackMessage } from "./format-utils";
 
-async function run({
+export async function run({
   githubOwner,
   githubRepo,
   githubToken,

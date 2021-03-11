@@ -39,7 +39,7 @@ export class PullRequest {
 
   constructor(pullRequest: {
     mergedAt: string;
-    number: string;
+    number: number;
     createdAt: string;
     title: string;
     state: string;
