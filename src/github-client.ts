@@ -1,4 +1,5 @@
 import { graphql } from '@octokit/graphql';
+import { Fetch, RequestParameters } from '@octokit/types';
 
 type PullRequestReview = {
   submittedAt: string;
@@ -93,12 +94,18 @@ export class PullRequest {
 export default class GithubClient {
   #graphql;
 
-  constructor({ token }: { token: string }) {
-    this.#graphql = graphql.defaults({
+  constructor({ token, fetch }: { token: string, fetch?: Fetch }) {
+    const options = {
       headers: {
         authorization: `token ${token}`,
       },
-    });
+    } as RequestParameters;
+
+    if (fetch) {
+      options.request = { fetch };
+    }
+
+    this.#graphql = graphql.defaults(options);
   }
 
   async getPullRequest({
