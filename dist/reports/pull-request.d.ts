@@ -5,7 +5,7 @@ export declare type PullRequestReviewDepth = {
     reviews: number;
     reviewers: number;
 };
-export default class PullRequestAnalysis {
+export default class PullRequestReport {
     #private;
     constructor(pullRequest: PullRequest);
     get title(): string;

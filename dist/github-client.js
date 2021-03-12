@@ -14,15 +14,8 @@ var __classPrivateFieldGet = (this && this.__classPrivateFieldGet) || function (
 };
 var _graphql;
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.PullRequest = exports.PullRequestState = exports.AnalysisPeriod = void 0;
+exports.PullRequest = exports.PullRequestState = void 0;
 const graphql_1 = require("@octokit/graphql");
-const luxon_1 = require("luxon");
-var AnalysisPeriod;
-(function (AnalysisPeriod) {
-    AnalysisPeriod["DAY"] = "day";
-    AnalysisPeriod["WEEK"] = "week";
-    AnalysisPeriod["MONTH"] = "month";
-})(AnalysisPeriod = exports.AnalysisPeriod || (exports.AnalysisPeriod = {}));
 var PullRequestState;
 (function (PullRequestState) {
     PullRequestState["OPENED"] = "OPEN";
@@ -31,7 +24,7 @@ var PullRequestState;
 })(PullRequestState = exports.PullRequestState || (exports.PullRequestState = {}));
 class PullRequest {
     constructor(pullRequest) {
-        const { mergedAt, number, createdAt, title, state, baseRefName } = pullRequest;
+        const { mergedAt, number, createdAt, title, state, baseRefName, } = pullRequest;
         const reviews = pullRequest.reviews.edges.map((edge) => {
             return {
                 submittedAt: edge.node.submittedAt,
@@ -64,7 +57,7 @@ class GithubClient {
             },
         }));
     }
-    async getPullRequest({ owner, repo, pullRequestNumber }) {
+    async getPullRequest({ owner, repo, pullRequestNumber, }) {
         const response = await __classPrivateFieldGet(this, _graphql).call(this, `
       {
         repository(owner: "${owner}", name: "${repo}") {
@@ -103,30 +96,10 @@ class GithubClient {
     `);
         return new PullRequest(response.repository.pullRequest);
     }
-    async getPullRequestsByPeriod({ owner, repo, period = AnalysisPeriod.DAY, limit = 50 }) {
-        const now = luxon_1.DateTime.now();
-        const today = now;
-        const thisWeek = luxon_1.DateTime.fromObject({ weekNumber: now.weekNumber });
-        const thisMonth = luxon_1.DateTime.fromObject({ month: now.month });
-        let start = '';
-        let end = '';
-        switch (period) {
-            case AnalysisPeriod.DAY:
-                start = today.toFormat('yyyy-MM-dd');
-                end = today.endOf('day').toString();
-                break;
-            case AnalysisPeriod.WEEK:
-                start = thisWeek.toFormat('yyyy-MM-dd');
-                end = thisWeek.endOf('week').toString();
-                break;
-            case AnalysisPeriod.MONTH:
-                start = thisMonth.toFormat('yyyy-MM-dd');
-                end = thisMonth.endOf('month').toString();
-                break;
-        }
+    async getPullRequestsByPeriod({ owner, repo, limit = 50, startDate, endDate, }) {
         const response = await __classPrivateFieldGet(this, _graphql).call(this, `
       {
-        search(query: "repo:${owner}/${repo} created:${start}..${end}", type: ISSUE, last: ${limit}) {
+        search(query: "repo:${owner}/${repo} created:${startDate}..${endDate}", type: ISSUE, last: ${limit}) {
           edges {
             node {
               ... on PullRequest {

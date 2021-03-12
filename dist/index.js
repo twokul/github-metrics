@@ -2,97 +2,6 @@ module.exports =
 /******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
-/***/ 6473:
-/***/ ((__unused_webpack_module, exports) => {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.constructDailyGithubMetricsSlackMessage = void 0;
-function constructDailyGithubMetricsSlackMessage({ content, text = '', channel }) {
-    const { repoName, openPullRequests, closedPullRequests, mergedPullRequests, averageTimeToMerge, averageIdleTime, aggregatedReviewDepth, hotfixes, } = content;
-    return {
-        text,
-        channel,
-        blocks: [
-            {
-                type: 'header',
-                text: {
-                    type: 'plain_text',
-                    text: `Daily Metrics for ${repoName} 📈`,
-                    emoji: true,
-                },
-            },
-            {
-                type: 'divider',
-            },
-            {
-                type: 'section',
-                text: {
-                    type: 'mrkdwn',
-                    text: `Number Of Pull Requests Opened: *${openPullRequests}*`,
-                },
-            },
-            {
-                type: 'section',
-                text: {
-                    type: 'mrkdwn',
-                    text: `Number Of Pull Requests Merged: *${mergedPullRequests}*`,
-                },
-            },
-            {
-                type: 'section',
-                text: {
-                    type: 'mrkdwn',
-                    text: `Number Of Pull Requests Closed: *${closedPullRequests}*`,
-                },
-            },
-            {
-                type: 'section',
-                text: {
-                    type: 'mrkdwn',
-                    text: `Average Time To Merge: *${averageTimeToMerge} hours*`,
-                },
-            },
-            {
-                type: 'section',
-                text: {
-                    type: 'mrkdwn',
-                    text: `Average Pull Request Idle Time: *${averageIdleTime} hours*`,
-                },
-            },
-            {
-                type: 'section',
-                text: {
-                    type: 'mrkdwn',
-                    text: `Review Depth: *${aggregatedReviewDepth.comments} comments, ${aggregatedReviewDepth.reviews} reviews by ${aggregatedReviewDepth.reviewers} people*`,
-                },
-            },
-            {
-                type: 'section',
-                text: {
-                    type: 'mrkdwn',
-                    text: `Number Of Hotfixes: *${hotfixes}*`,
-                },
-            },
-            {
-                type: 'divider',
-            },
-            {
-                type: 'section',
-                text: {
-                    type: 'mrkdwn',
-                    text: '_This is an automated post by <https://git.io/JqZ6w|github-metrics>._',
-                },
-            },
-        ],
-    };
-}
-exports.constructDailyGithubMetricsSlackMessage = constructDailyGithubMetricsSlackMessage;
-
-
-/***/ }),
-
 /***/ 19:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
@@ -113,15 +22,8 @@ var __classPrivateFieldGet = (this && this.__classPrivateFieldGet) || function (
 };
 var _graphql;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.PullRequest = exports.PullRequestState = exports.AnalysisPeriod = void 0;
+exports.PullRequest = exports.PullRequestState = void 0;
 const graphql_1 = __nccwpck_require__(9015);
-const luxon_1 = __nccwpck_require__(895);
-var AnalysisPeriod;
-(function (AnalysisPeriod) {
-    AnalysisPeriod["DAY"] = "day";
-    AnalysisPeriod["WEEK"] = "week";
-    AnalysisPeriod["MONTH"] = "month";
-})(AnalysisPeriod = exports.AnalysisPeriod || (exports.AnalysisPeriod = {}));
 var PullRequestState;
 (function (PullRequestState) {
     PullRequestState["OPENED"] = "OPEN";
@@ -130,7 +32,7 @@ var PullRequestState;
 })(PullRequestState = exports.PullRequestState || (exports.PullRequestState = {}));
 class PullRequest {
     constructor(pullRequest) {
-        const { mergedAt, number, createdAt, title, state, baseRefName } = pullRequest;
+        const { mergedAt, number, createdAt, title, state, baseRefName, } = pullRequest;
         const reviews = pullRequest.reviews.edges.map((edge) => {
             return {
                 submittedAt: edge.node.submittedAt,
@@ -163,7 +65,7 @@ class GithubClient {
             },
         }));
     }
-    async getPullRequest({ owner, repo, pullRequestNumber }) {
+    async getPullRequest({ owner, repo, pullRequestNumber, }) {
         const response = await __classPrivateFieldGet(this, _graphql).call(this, `
       {
         repository(owner: "${owner}", name: "${repo}") {
@@ -202,30 +104,10 @@ class GithubClient {
     `);
         return new PullRequest(response.repository.pullRequest);
     }
-    async getPullRequestsByPeriod({ owner, repo, period = AnalysisPeriod.DAY, limit = 50 }) {
-        const now = luxon_1.DateTime.now();
-        const today = now;
-        const thisWeek = luxon_1.DateTime.fromObject({ weekNumber: now.weekNumber });
-        const thisMonth = luxon_1.DateTime.fromObject({ month: now.month });
-        let start = '';
-        let end = '';
-        switch (period) {
-            case AnalysisPeriod.DAY:
-                start = today.toFormat('yyyy-MM-dd');
-                end = today.endOf('day').toString();
-                break;
-            case AnalysisPeriod.WEEK:
-                start = thisWeek.toFormat('yyyy-MM-dd');
-                end = thisWeek.endOf('week').toString();
-                break;
-            case AnalysisPeriod.MONTH:
-                start = thisMonth.toFormat('yyyy-MM-dd');
-                end = thisMonth.endOf('month').toString();
-                break;
-        }
+    async getPullRequestsByPeriod({ owner, repo, limit = 50, startDate, endDate, }) {
         const response = await __classPrivateFieldGet(this, _graphql).call(this, `
       {
-        search(query: "repo:${owner}/${repo} created:${start}..${end}", type: ISSUE, last: ${limit}) {
+        search(query: "repo:${owner}/${repo} created:${startDate}..${endDate}", type: ISSUE, last: ${limit}) {
           edges {
             node {
               ... on PullRequest {
@@ -279,9 +161,6 @@ _graphql = new WeakMap();
 
 "use strict";
 
-/**
- * @packageDocumentation A small library to fetch aggregated information from Github.
- */
 var __classPrivateFieldSet = (this && this.__classPrivateFieldSet) || function (receiver, privateMap, value) {
     if (!privateMap.has(receiver)) {
         throw new TypeError("attempted to set private field on non-instance");
@@ -299,17 +178,31 @@ var _githubClient;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const github_client_1 = __nccwpck_require__(19);
 const repository_1 = __nccwpck_require__(5306);
+const date_1 = __nccwpck_require__(8170);
 class GithubMetrics {
     constructor({ token }) {
         _githubClient.set(this, void 0);
         __classPrivateFieldSet(this, _githubClient, new github_client_1.default({ token }));
     }
-    async generateDailyReport({ owner, repo }) {
+    async generateDailyReport({ owner, repo, }) {
+        const { startDate, endDate } = date_1.generateDateRange();
         const pullRequests = await __classPrivateFieldGet(this, _githubClient).getPullRequestsByPeriod({
             owner,
             repo,
+            startDate,
+            endDate,
         });
-        return new repository_1.default({ pullRequests, owner, repo });
+        return new repository_1.default({ pullRequests, owner, repo, startDate, endDate });
+    }
+    async generateWeeklyReport({ owner, repo, }) {
+        const { startDate, endDate } = date_1.generateDateRange(date_1.Period.WEEK);
+        const pullRequests = await __classPrivateFieldGet(this, _githubClient).getPullRequestsByPeriod({
+            owner,
+            repo,
+            startDate,
+            endDate,
+        });
+        return new repository_1.default({ pullRequests, owner, repo, startDate, endDate });
     }
 }
 exports.default = GithubMetrics;
@@ -324,33 +217,58 @@ _githubClient = new WeakMap();
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.run = void 0;
 const core = __nccwpck_require__(7970);
 const github_metrics_1 = __nccwpck_require__(4580);
 const web_api_1 = __nccwpck_require__(3523);
-const format_utils_1 = __nccwpck_require__(6473);
+const slack_1 = __nccwpck_require__(465);
+const luxon_1 = __nccwpck_require__(895);
 async function run({ githubOwner, githubRepo, githubToken, slackAppToken, slackChannelId, }) {
     try {
         const slack = new web_api_1.WebClient(slackAppToken);
         const githubMetrics = new github_metrics_1.default({
             token: githubToken,
         });
-        const dailyReport = await githubMetrics.generateDailyReport({
+        const weeklyReport = await githubMetrics.generateWeeklyReport({
             owner: githubOwner,
             repo: githubRepo,
         });
-        const message = format_utils_1.constructDailyGithubMetricsSlackMessage({
-            text: "Hello world!",
+        const formattedStartDate = luxon_1.DateTime.fromISO(weeklyReport.startDate).toISODate();
+        const formattedEndDate = luxon_1.DateTime.fromISO(weeklyReport.endDate).toISODate();
+        const message = slack_1.constructSlackMessage({
+            header: `Weekly Metrics for ${weeklyReport.name} (${formattedStartDate} - ${formattedEndDate}) 📈`,
+            footer: '_This is an automated post by <https://git.io/JqZ6w|github-metrics>._',
+            sections: [
+                {
+                    text: `<${weeklyReport.url}|View PRs on Github>`,
+                },
+                {
+                    text: `Number Of Pull Requests Opened: *${weeklyReport.openedPullRequests.length}*`,
+                },
+                {
+                    text: `Number Of Pull Requests Merged: *${weeklyReport.mergedPullRequests.length}*`,
+                },
+                {
+                    text: `Number Of Pull Requests Closed: *${weeklyReport.closedPullRequests.length}*`,
+                },
+                {
+                    text: `Average Time To Merge: *${weeklyReport.averageTimeToMerge
+                        ? weeklyReport.averageTimeToMerge.toFixed(1)
+                        : null} hours*`,
+                },
+                {
+                    text: `Average Pull Request Idle Time: *${weeklyReport.averageIdleTime
+                        ? weeklyReport.averageIdleTime.toFixed(1)
+                        : null} hours*`,
+                },
+                {
+                    text: `Review Depth: *${weeklyReport.aggregatedReviewDepth.comments} comments, ${weeklyReport.aggregatedReviewDepth.reviews} reviews by ${weeklyReport.aggregatedReviewDepth.reviewers} people*`,
+                },
+                {
+                    text: `Number Of Hotfixes: *${weeklyReport.hotfixes}*`,
+                },
+            ],
             channel: slackChannelId,
-            content: {
-                repoName: dailyReport.name,
-                openPullRequests: dailyReport.openedPullRequests.length,
-                closedPullRequests: dailyReport.closedPullRequests.length,
-                mergedPullRequests: dailyReport.mergedPullRequests.length,
-                averageIdleTime: Number(dailyReport.averageIdleTime.toFixed(1)),
-                averageTimeToMerge: Number(dailyReport.averageTimeToMerge.toFixed(1)),
-                aggregatedReviewDepth: dailyReport.aggregatedReviewDepth,
-                hotfixes: dailyReport.hotfixes,
-            },
         });
         const result = await slack.chat.postMessage(message);
         core.debug(`Successfully send message ${result.ts} in conversation ${slackChannelId}`);
@@ -359,11 +277,12 @@ async function run({ githubOwner, githubRepo, githubToken, slackAppToken, slackC
         core.setFailed(error.message);
     }
 }
-const githubOwner = process.env.GITHUB_OWNER || core.getInput("github-owner");
-const githubRepo = process.env.GITHUB_REPO || core.getInput("github-repo");
-const githubToken = process.env.GITHUB_TOKEN || core.getInput("github-token");
-const slackChannelId = process.env.SLACK_CHANNEL_ID || core.getInput("slack-channel-id");
-const slackAppToken = process.env.SLACK_APP_TOKEN || core.getInput("slack-app-token");
+exports.run = run;
+const githubOwner = process.env.GITHUB_OWNER || core.getInput('github-owner');
+const githubRepo = process.env.GITHUB_REPO || core.getInput('github-repo');
+const githubToken = process.env.GITHUB_TOKEN || core.getInput('github-token');
+const slackChannelId = process.env.SLACK_CHANNEL_ID || core.getInput('slack-channel-id');
+const slackAppToken = process.env.SLACK_APP_TOKEN || core.getInput('slack-app-token');
 run({
     githubOwner,
     githubRepo,
@@ -396,7 +315,7 @@ var __classPrivateFieldGet = (this && this.__classPrivateFieldGet) || function (
 var _pullRequest;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const luxon_1 = __nccwpck_require__(895);
-class PullRequestAnalysis {
+class PullRequestReport {
     constructor(pullRequest) {
         _pullRequest.set(this, void 0);
         __classPrivateFieldSet(this, _pullRequest, pullRequest);
@@ -409,7 +328,9 @@ class PullRequestAnalysis {
     }
     get idleTime() {
         const createdAt = __classPrivateFieldGet(this, _pullRequest).createdAt;
-        const submittedAt = __classPrivateFieldGet(this, _pullRequest).reviews.length === 0 ? luxon_1.DateTime.now().toString() : __classPrivateFieldGet(this, _pullRequest).reviews[0].submittedAt;
+        const submittedAt = __classPrivateFieldGet(this, _pullRequest).reviews.length === 0
+            ? luxon_1.DateTime.now().toString()
+            : __classPrivateFieldGet(this, _pullRequest).reviews[0].submittedAt;
         const createdAtDateTime = luxon_1.DateTime.fromISO(createdAt);
         const submittedAtDateTime = luxon_1.DateTime.fromISO(submittedAt);
         return submittedAtDateTime.diff(createdAtDateTime);
@@ -421,12 +342,13 @@ class PullRequestAnalysis {
         const createdAt = __classPrivateFieldGet(this, _pullRequest).createdAt;
         const mergedAt = __classPrivateFieldGet(this, _pullRequest).mergedAt;
         const createdAtDateTime = luxon_1.DateTime.fromISO(createdAt);
-        const mergedAtDateTime = mergedAt ? luxon_1.DateTime.fromISO(mergedAt) : luxon_1.DateTime.now();
+        const mergedAtDateTime = mergedAt
+            ? luxon_1.DateTime.fromISO(mergedAt)
+            : luxon_1.DateTime.now();
         return mergedAtDateTime.diff(createdAtDateTime);
     }
     get reviewDepth() {
         const reviewers = new Set();
-        __classPrivateFieldGet(this, _pullRequest).comments.forEach((comment) => reviewers.add(comment.author));
         __classPrivateFieldGet(this, _pullRequest).reviews.forEach((pullRequestReview) => reviewers.add(pullRequestReview.author));
         return {
             comments: __classPrivateFieldGet(this, _pullRequest).comments.length,
@@ -435,7 +357,7 @@ class PullRequestAnalysis {
         };
     }
 }
-exports.default = PullRequestAnalysis;
+exports.default = PullRequestReport;
 _pullRequest = new WeakMap();
 
 
@@ -459,21 +381,34 @@ var __classPrivateFieldGet = (this && this.__classPrivateFieldGet) || function (
     }
     return privateMap.get(receiver);
 };
-var _owner, _repo, _pullRequests;
+var _owner, _repo, _pullRequests, _startDate, _endDate;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const github_client_1 = __nccwpck_require__(19);
 const pull_request_1 = __nccwpck_require__(6762);
 class RepositoryReport {
-    constructor({ owner, repo, pullRequests }) {
+    constructor({ owner, repo, pullRequests, startDate, endDate, }) {
         _owner.set(this, void 0);
         _repo.set(this, void 0);
         _pullRequests.set(this, void 0);
+        _startDate.set(this, void 0);
+        _endDate.set(this, void 0);
         __classPrivateFieldSet(this, _owner, owner);
         __classPrivateFieldSet(this, _repo, repo);
         __classPrivateFieldSet(this, _pullRequests, pullRequests);
+        __classPrivateFieldSet(this, _startDate, startDate);
+        __classPrivateFieldSet(this, _endDate, endDate);
     }
     get name() {
         return `${__classPrivateFieldGet(this, _owner)}/${__classPrivateFieldGet(this, _repo)}`;
+    }
+    get url() {
+        return `https://github.com/${__classPrivateFieldGet(this, _owner)}/${__classPrivateFieldGet(this, _repo)}/pulls?q=created:${__classPrivateFieldGet(this, _startDate)}..${__classPrivateFieldGet(this, _endDate)}`;
+    }
+    get startDate() {
+        return __classPrivateFieldGet(this, _startDate);
+    }
+    get endDate() {
+        return __classPrivateFieldGet(this, _endDate);
     }
     get openedPullRequests() {
         return __classPrivateFieldGet(this, _pullRequests).filter((pr) => pr.state === github_client_1.PullRequestState.OPENED);
@@ -485,10 +420,14 @@ class RepositoryReport {
         return __classPrivateFieldGet(this, _pullRequests).filter((pr) => pr.state === github_client_1.PullRequestState.MERGED);
     }
     get hotfixes() {
-        const hotfixes = __classPrivateFieldGet(this, _pullRequests).map((pr) => new pull_request_1.default(pr)).filter((pr) => pr.isHotfix);
+        const hotfixes = __classPrivateFieldGet(this, _pullRequests).map((pr) => new pull_request_1.default(pr))
+            .filter((pr) => pr.isHotfix);
         return hotfixes.length;
     }
     get averageTimeToMerge() {
+        if (__classPrivateFieldGet(this, _pullRequests).length === 0) {
+            return 0;
+        }
         const totalTimeToMerge = __classPrivateFieldGet(this, _pullRequests).map((pullRequest) => {
             const analysis = new pull_request_1.default(pullRequest);
             return Number(analysis.timeToMerge.toFormat('h'));
@@ -514,6 +453,9 @@ class RepositoryReport {
         return reviewDepth;
     }
     get averageIdleTime() {
+        if (__classPrivateFieldGet(this, _pullRequests).length === 0) {
+            return 0;
+        }
         const totalIdleTime = __classPrivateFieldGet(this, _pullRequests).map((pullRequest) => {
             const analysis = new pull_request_1.default(pullRequest);
             return Number(analysis.idleTime.toFormat('h'));
@@ -523,7 +465,95 @@ class RepositoryReport {
     }
 }
 exports.default = RepositoryReport;
-_owner = new WeakMap(), _repo = new WeakMap(), _pullRequests = new WeakMap();
+_owner = new WeakMap(), _repo = new WeakMap(), _pullRequests = new WeakMap(), _startDate = new WeakMap(), _endDate = new WeakMap();
+
+
+/***/ }),
+
+/***/ 8170:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.generateDateRange = exports.Period = void 0;
+const luxon_1 = __nccwpck_require__(895);
+var Period;
+(function (Period) {
+    Period["DAY"] = "day";
+    Period["WEEK"] = "week";
+    Period["MONTH"] = "month";
+})(Period = exports.Period || (exports.Period = {}));
+function generateDateRange(period = Period.DAY) {
+    const today = luxon_1.DateTime.now();
+    const startDate = today.startOf(period).toString();
+    const endDate = today.endOf(period).toString();
+    return {
+        startDate,
+        endDate,
+    };
+}
+exports.generateDateRange = generateDateRange;
+
+
+/***/ }),
+
+/***/ 465:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.constructSlackMessage = void 0;
+/**
+ * Creates the following structure for a message:
+ *
+ * -- header --
+ * -- divider --
+ * -- sections --
+ * -- divider --
+ * -- footer --
+ */
+function constructSlackMessage({ channel, header, footer, sections = [], text = '', }) {
+    const blocks = [
+        {
+            type: 'header',
+            text: {
+                type: 'plain_text',
+                text: header,
+                emoji: true,
+            },
+        },
+    ];
+    blocks.push({ type: 'divider' });
+    sections.forEach((section) => {
+        blocks.push({
+            type: 'section',
+            text: {
+                type: 'mrkdwn',
+                text: section.text,
+            },
+        });
+    });
+    if (sections.length > 0 && footer) {
+        blocks.push({ type: 'divider' });
+    }
+    if (footer) {
+        blocks.push({
+            type: 'section',
+            text: {
+                type: 'mrkdwn',
+                text: footer,
+            },
+        });
+    }
+    return {
+        text,
+        channel,
+        blocks,
+    };
+}
+exports.constructSlackMessage = constructSlackMessage;
 
 
 /***/ }),

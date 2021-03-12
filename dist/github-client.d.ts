@@ -1,8 +1,3 @@
-export declare enum AnalysisPeriod {
-    DAY = "day",
-    WEEK = "week",
-    MONTH = "month"
-}
 declare type PullRequestReview = {
     submittedAt: string;
     author: string;
@@ -21,13 +16,13 @@ export declare class PullRequest {
     state: string;
     baseRefName: string;
     number: number;
-    mergedAt: string;
+    mergedAt: string | null;
     createdAt: string;
     comments: Array<PullRequestComment>;
     reviews: Array<PullRequestReview>;
     constructor(pullRequest: {
-        mergedAt: string;
-        number: string;
+        mergedAt: string | null;
+        number: number;
         createdAt: string;
         title: string;
         state: string;
@@ -59,16 +54,17 @@ export default class GithubClient {
     constructor({ token }: {
         token: string;
     });
-    getPullRequest({ owner, repo, pullRequestNumber }: {
+    getPullRequest({ owner, repo, pullRequestNumber, }: {
         owner: string;
         repo: string;
         pullRequestNumber: number;
     }): Promise<PullRequest>;
-    getPullRequestsByPeriod({ owner, repo, period, limit }: {
+    getPullRequestsByPeriod({ owner, repo, limit, startDate, endDate, }: {
         owner: string;
         repo: string;
-        period?: AnalysisPeriod;
         limit?: number;
+        startDate: string;
+        endDate: string;
     }): Promise<Array<PullRequest>>;
 }
 export {};

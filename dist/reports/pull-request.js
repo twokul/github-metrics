@@ -15,7 +15,7 @@ var __classPrivateFieldGet = (this && this.__classPrivateFieldGet) || function (
 var _pullRequest;
 Object.defineProperty(exports, "__esModule", { value: true });
 const luxon_1 = require("luxon");
-class PullRequestAnalysis {
+class PullRequestReport {
     constructor(pullRequest) {
         _pullRequest.set(this, void 0);
         __classPrivateFieldSet(this, _pullRequest, pullRequest);
@@ -28,7 +28,9 @@ class PullRequestAnalysis {
     }
     get idleTime() {
         const createdAt = __classPrivateFieldGet(this, _pullRequest).createdAt;
-        const submittedAt = __classPrivateFieldGet(this, _pullRequest).reviews.length === 0 ? luxon_1.DateTime.now().toString() : __classPrivateFieldGet(this, _pullRequest).reviews[0].submittedAt;
+        const submittedAt = __classPrivateFieldGet(this, _pullRequest).reviews.length === 0
+            ? luxon_1.DateTime.now().toString()
+            : __classPrivateFieldGet(this, _pullRequest).reviews[0].submittedAt;
         const createdAtDateTime = luxon_1.DateTime.fromISO(createdAt);
         const submittedAtDateTime = luxon_1.DateTime.fromISO(submittedAt);
         return submittedAtDateTime.diff(createdAtDateTime);
@@ -40,12 +42,13 @@ class PullRequestAnalysis {
         const createdAt = __classPrivateFieldGet(this, _pullRequest).createdAt;
         const mergedAt = __classPrivateFieldGet(this, _pullRequest).mergedAt;
         const createdAtDateTime = luxon_1.DateTime.fromISO(createdAt);
-        const mergedAtDateTime = mergedAt ? luxon_1.DateTime.fromISO(mergedAt) : luxon_1.DateTime.now();
+        const mergedAtDateTime = mergedAt
+            ? luxon_1.DateTime.fromISO(mergedAt)
+            : luxon_1.DateTime.now();
         return mergedAtDateTime.diff(createdAtDateTime);
     }
     get reviewDepth() {
         const reviewers = new Set();
-        __classPrivateFieldGet(this, _pullRequest).comments.forEach((comment) => reviewers.add(comment.author));
         __classPrivateFieldGet(this, _pullRequest).reviews.forEach((pullRequestReview) => reviewers.add(pullRequestReview.author));
         return {
             comments: __classPrivateFieldGet(this, _pullRequest).comments.length,
@@ -54,5 +57,5 @@ class PullRequestAnalysis {
         };
     }
 }
-exports.default = PullRequestAnalysis;
+exports.default = PullRequestReport;
 _pullRequest = new WeakMap();
