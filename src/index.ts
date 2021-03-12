@@ -28,6 +28,7 @@ export async function run({
     });
     const formattedStartDate = DateTime.fromISO(weeklyReport.startDate).toISODate();
     const formattedEndDate = DateTime.fromISO(weeklyReport.endDate).toISODate();
+    const metricsDocumentationUrl = 'https://git.io/JqCGq';
 
     const message = constructSlackMessage({
       header: `Weekly Metrics for ${weeklyReport.name} (${formattedStartDate} - ${formattedEndDate}) 📈`,
@@ -35,7 +36,7 @@ export async function run({
         '_This is an automated post by <https://git.io/JqZ6w|github-metrics>._',
       sections: [
         {
-          text: `<${weeklyReport.url}|View PRs on Github>`,
+          text: `<${weeklyReport.url}|View PRs on Github> | <${metricsDocumentationUrl}|About Metrics>`,
         },
         {
           text: `Number Of Pull Requests Opened: *${weeklyReport.openedPullRequests.length}*`,
