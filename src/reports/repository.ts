@@ -68,6 +68,12 @@ export default class RepositoryReport {
     );
   }
 
+  get mergedAndOpened(): Array<PullRequest> {
+    return this.#pullRequests.filter(
+      (pullRequest) => pullRequest.state != PullRequestState.CLOSED
+    );
+  }
+
   get hotfixes(): number {
     const hotfixes = this.#pullRequests
       .map((pr) => new PullRequestReport(pr))
@@ -81,8 +87,7 @@ export default class RepositoryReport {
       return 0;
     }
 
-    const totalTimeToMerge = this.#pullRequests
-      .filter((pullRequest) => pullRequest.state != PullRequestState.CLOSED)
+    const totalTimeToMerge = this.mergedPullRequests
       .map((pullRequest) => {
         const analysis = new PullRequestReport(pullRequest);
 
@@ -90,7 +95,7 @@ export default class RepositoryReport {
       })
       .reduce((sum, value) => (sum += value), 0);
 
-    return totalTimeToMerge / this.#pullRequests.length;
+    return totalTimeToMerge / this.mergedPullRequests.length;
   }
 
   get aggregatedReviewDepth(): PullRequestReviewDepth {
@@ -120,8 +125,7 @@ export default class RepositoryReport {
       return 0;
     }
 
-    const totalIdleTime = this.#pullRequests
-      .filter((pullRequest) => pullRequest.state != PullRequestState.CLOSED)
+    const totalIdleTime = this.mergedAndOpened
       .map((pullRequest) => {
         const analysis = new PullRequestReport(pullRequest);
 
@@ -129,6 +133,6 @@ export default class RepositoryReport {
       })
       .reduce((sum, value) => (sum += value), 0);
 
-    return totalIdleTime / this.#pullRequests.length;
+    return totalIdleTime / this.mergedAndOpened.length;
   }
 }

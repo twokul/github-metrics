@@ -16,6 +16,7 @@ export default class RepositoryReport {
     get openedPullRequests(): Array<PullRequest>;
     get closedPullRequests(): Array<PullRequest>;
     get mergedPullRequests(): Array<PullRequest>;
+    get mergedAndOpened(): Array<PullRequest>;
     get hotfixes(): number;
     get averageTimeToMerge(): number;
     get aggregatedReviewDepth(): PullRequestReviewDepth;

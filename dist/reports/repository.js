@@ -50,6 +50,9 @@ class RepositoryReport {
     get mergedPullRequests() {
         return __classPrivateFieldGet(this, _pullRequests).filter((pr) => pr.state === github_client_1.PullRequestState.MERGED);
     }
+    get mergedAndOpened() {
+        return __classPrivateFieldGet(this, _pullRequests).filter((pullRequest) => pullRequest.state != github_client_1.PullRequestState.CLOSED);
+    }
     get hotfixes() {
         const hotfixes = __classPrivateFieldGet(this, _pullRequests).map((pr) => new pull_request_1.default(pr))
             .filter((pr) => pr.isHotfix);
@@ -59,13 +62,13 @@ class RepositoryReport {
         if (__classPrivateFieldGet(this, _pullRequests).length === 0) {
             return 0;
         }
-        const totalTimeToMerge = __classPrivateFieldGet(this, _pullRequests).filter((pullRequest) => pullRequest.state != github_client_1.PullRequestState.CLOSED)
+        const totalTimeToMerge = this.mergedPullRequests
             .map((pullRequest) => {
             const analysis = new pull_request_1.default(pullRequest);
             return Number(analysis.timeToMerge.toFormat('h'));
         })
             .reduce((sum, value) => (sum += value), 0);
-        return totalTimeToMerge / __classPrivateFieldGet(this, _pullRequests).length;
+        return totalTimeToMerge / this.mergedPullRequests.length;
     }
     get aggregatedReviewDepth() {
         const reviewDepth = {
@@ -88,13 +91,13 @@ class RepositoryReport {
         if (__classPrivateFieldGet(this, _pullRequests).length === 0) {
             return 0;
         }
-        const totalIdleTime = __classPrivateFieldGet(this, _pullRequests).filter((pullRequest) => pullRequest.state != github_client_1.PullRequestState.CLOSED)
+        const totalIdleTime = this.mergedAndOpened
             .map((pullRequest) => {
             const analysis = new pull_request_1.default(pullRequest);
             return Number(analysis.idleTime.toFormat('h'));
         })
             .reduce((sum, value) => (sum += value), 0);
-        return totalIdleTime / __classPrivateFieldGet(this, _pullRequests).length;
+        return totalIdleTime / this.mergedAndOpened.length;
     }
 }
 exports.default = RepositoryReport;
