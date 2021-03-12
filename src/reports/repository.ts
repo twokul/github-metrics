@@ -37,7 +37,9 @@ export default class RepositoryReport {
   }
 
   get url(): string {
-    return `https://github.com/${this.#owner}/${this.#repo}/pulls?q=created:${this.#startDate}..${this.#endDate}`;
+    return `https://github.com/${this.#owner}/${this.#repo}/pulls?q=created:${
+      this.#startDate
+    }..${this.#endDate}`;
   }
 
   get startDate(): string {
@@ -80,6 +82,7 @@ export default class RepositoryReport {
     }
 
     const totalTimeToMerge = this.#pullRequests
+      .filter((pullRequest) => pullRequest.state != PullRequestState.CLOSED)
       .map((pullRequest) => {
         const analysis = new PullRequestReport(pullRequest);
 
@@ -118,6 +121,7 @@ export default class RepositoryReport {
     }
 
     const totalIdleTime = this.#pullRequests
+      .filter((pullRequest) => pullRequest.state != PullRequestState.CLOSED)
       .map((pullRequest) => {
         const analysis = new PullRequestReport(pullRequest);
 

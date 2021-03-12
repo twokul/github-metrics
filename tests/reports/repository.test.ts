@@ -49,8 +49,8 @@ describe('Repository Report', () => {
     expect(report.mergedPullRequests.length).toEqual(14);
     expect(report.hotfixes).toEqual(0);
     expect(report.url).toEqual('https://github.com/Marvel/Avengers/pulls?q=created:2021-03-08..2021-03-14');
-    expect(report.averageIdleTime).toEqual(10.5);
-    expect(report.averageTimeToMerge).toEqual(16.458333333333332);
+    expect(report.averageIdleTime).toEqual(7.6875);
+    expect(report.averageTimeToMerge).toEqual(11.270833333333334);
     expect(report.aggregatedReviewDepth).toEqual({
       comments: 0,
       reviews: 51,

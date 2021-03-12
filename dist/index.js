@@ -428,7 +428,8 @@ class RepositoryReport {
         if (__classPrivateFieldGet(this, _pullRequests).length === 0) {
             return 0;
         }
-        const totalTimeToMerge = __classPrivateFieldGet(this, _pullRequests).map((pullRequest) => {
+        const totalTimeToMerge = __classPrivateFieldGet(this, _pullRequests).filter((pullRequest) => pullRequest.state != github_client_1.PullRequestState.CLOSED)
+            .map((pullRequest) => {
             const analysis = new pull_request_1.default(pullRequest);
             return Number(analysis.timeToMerge.toFormat('h'));
         })
@@ -456,7 +457,8 @@ class RepositoryReport {
         if (__classPrivateFieldGet(this, _pullRequests).length === 0) {
             return 0;
         }
-        const totalIdleTime = __classPrivateFieldGet(this, _pullRequests).map((pullRequest) => {
+        const totalIdleTime = __classPrivateFieldGet(this, _pullRequests).filter((pullRequest) => pullRequest.state != github_client_1.PullRequestState.CLOSED)
+            .map((pullRequest) => {
             const analysis = new pull_request_1.default(pullRequest);
             return Number(analysis.idleTime.toFormat('h'));
         })
