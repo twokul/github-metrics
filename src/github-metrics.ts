@@ -24,7 +24,7 @@ export default class GithubMetrics {
       endDate,
     });
 
-    return new RepositoryReport({ pullRequests, owner, repo });
+    return new RepositoryReport({ pullRequests, owner, repo, startDate, endDate });
   }
 
   async generateWeeklyReport({
@@ -42,6 +42,6 @@ export default class GithubMetrics {
       endDate,
     });
 
-    return new RepositoryReport({ pullRequests, owner, repo });
+    return new RepositoryReport({ pullRequests, owner, repo, startDate, endDate });
   }
 }

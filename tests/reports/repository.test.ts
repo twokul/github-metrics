@@ -17,14 +17,14 @@ describe('Repository Report', () => {
     const owner = 'Marvel';
     const repo = 'Avengers';
     const pullRequests = [] as Array<PullRequest>;
-    const report = new RepositoryReport({ pullRequests, owner, repo });
+    const report = new RepositoryReport({ pullRequests, owner, repo, startDate: '2021-03-08', endDate: '2021-03-14' });
 
     expect(report.name).toEqual('Marvel/Avengers');
     expect(report.openedPullRequests).toEqual([]);
     expect(report.closedPullRequests).toEqual([]);
     expect(report.mergedPullRequests).toEqual([]);
     expect(report.hotfixes).toEqual(0);
-    expect(report.url).toEqual('');
+    expect(report.url).toEqual('https://github.com/Marvel/Avengers/pulls?q=created:2021-03-08..2021-03-14');
     expect(report.averageIdleTime).toEqual(0);
     expect(report.averageTimeToMerge).toEqual(0);
     expect(report.aggregatedReviewDepth).toEqual({
@@ -41,14 +41,14 @@ describe('Repository Report', () => {
       return new PullRequest(edge.node);
     });
 
-    const report = new RepositoryReport({ pullRequests, owner, repo });
+    const report = new RepositoryReport({ pullRequests, owner, repo, startDate: '2021-03-08', endDate: '2021-03-14' });
 
     expect(report.name).toEqual('Marvel/Avengers');
     expect(report.openedPullRequests.length).toEqual(15);
     expect(report.closedPullRequests.length).toEqual(19);
     expect(report.mergedPullRequests.length).toEqual(14);
     expect(report.hotfixes).toEqual(0);
-    expect(report.url).toEqual('');
+    expect(report.url).toEqual('https://github.com/Marvel/Avengers/pulls?q=created:2021-03-08..2021-03-14');
     expect(report.averageIdleTime).toEqual(10.5);
     expect(report.averageTimeToMerge).toEqual(16.458333333333332);
     expect(report.aggregatedReviewDepth).toEqual({

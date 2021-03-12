@@ -2,6 +2,7 @@ import * as core from '@actions/core';
 import GithubMetrics from './github-metrics';
 import { WebClient } from '@slack/web-api';
 import { constructSlackMessage } from './utils/slack';
+import { DateTime } from 'luxon';
 
 export async function run({
   githubOwner,
@@ -25,12 +26,17 @@ export async function run({
       owner: githubOwner,
       repo: githubRepo,
     });
+    const formattedStartDate = DateTime.fromISO(weeklyReport.startDate).toISODate();
+    const formattedEndDate = DateTime.fromISO(weeklyReport.endDate).toISODate();
 
     const message = constructSlackMessage({
-      header: `Weekly Metrics for ${weeklyReport.name} (${weeklyReport.startDate} - ${weeklyReport.endDate}) 📈`,
+      header: `Weekly Metrics for ${weeklyReport.name} (${formattedStartDate} - ${formattedEndDate}) 📈`,
       footer:
         '_This is an automated post by <https://git.io/JqZ6w|github-metrics>._',
       sections: [
+        {
+          text: `<${weeklyReport.url}|View PRs on Github>`,
+        },
         {
           text: `Number Of Pull Requests Opened: *${weeklyReport.openedPullRequests.length}*`,
         },

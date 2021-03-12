@@ -8,18 +8,28 @@ export default class RepositoryReport {
 
   #pullRequests;
 
+  #startDate;
+
+  #endDate;
+
   constructor({
     owner,
     repo,
     pullRequests,
+    startDate,
+    endDate,
   }: {
     owner: string;
     repo: string;
     pullRequests: Array<PullRequest>;
+    startDate: string;
+    endDate: string;
   }) {
     this.#owner = owner;
     this.#repo = repo;
     this.#pullRequests = pullRequests;
+    this.#startDate = startDate;
+    this.#endDate = endDate;
   }
 
   get name(): string {
@@ -27,15 +37,15 @@ export default class RepositoryReport {
   }
 
   get url(): string {
-    return '';
+    return `https://github.com/${this.#owner}/${this.#repo}/pulls?q=created:${this.#startDate}..${this.#endDate}`;
   }
 
   get startDate(): string {
-    return '';
+    return this.#startDate;
   }
 
   get endDate(): string {
-    return '';
+    return this.#endDate;
   }
 
   get openedPullRequests(): Array<PullRequest> {
