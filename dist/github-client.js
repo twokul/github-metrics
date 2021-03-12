@@ -49,13 +49,17 @@ class PullRequest {
 }
 exports.PullRequest = PullRequest;
 class GithubClient {
-    constructor({ token }) {
+    constructor({ token, fetch }) {
         _graphql.set(this, void 0);
-        __classPrivateFieldSet(this, _graphql, graphql_1.graphql.defaults({
+        const options = {
             headers: {
                 authorization: `token ${token}`,
             },
-        }));
+        };
+        if (fetch) {
+            options.request = { fetch };
+        }
+        __classPrivateFieldSet(this, _graphql, graphql_1.graphql.defaults(options));
     }
     async getPullRequest({ owner, repo, pullRequestNumber, }) {
         const response = await __classPrivateFieldGet(this, _graphql).call(this, `

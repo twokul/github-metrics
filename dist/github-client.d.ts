@@ -1,3 +1,4 @@
+import { Fetch } from '@octokit/types';
 declare type PullRequestReview = {
     submittedAt: string;
     author: string;
@@ -51,8 +52,9 @@ export declare class PullRequest {
 }
 export default class GithubClient {
     #private;
-    constructor({ token }: {
+    constructor({ token, fetch }: {
         token: string;
+        fetch?: Fetch;
     });
     getPullRequest({ owner, repo, pullRequestNumber, }: {
         owner: string;
