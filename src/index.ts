@@ -4,6 +4,15 @@ import { WebClient } from '@slack/web-api';
 import { constructSlackMessage } from './utils/slack';
 import { DateTime } from 'luxon';
 
+/**
+ * The function that runs the following workflow:
+ * 
+ * - Creates both Github and Slack clients
+ * - Generates a weekly pull requests report 
+ * - Posts a message on Slack
+ * 
+ * @public
+ */
 export async function run({
   githubOwner,
   githubRepo,

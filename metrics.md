@@ -30,18 +30,15 @@ The number of pull requests against `release/*` branch.
 
 ## Aggregated Pull Request Review Depth
 
-The aggregated number of comments, reviews and reviewers.
+The aggregated number of comments, reviews and reviewers across all pull
+requests.
 
 ## Average Time to Merge
 
-The amount of time from the first commit to the pull request merge.
-
-Practically, the different between "PR created" and the "PR merged" times.
+Time to merge is the amount of time elapsed from "pull request created" to
+"pull request merged" across all merged pull requests.
 
 ## Average Pull Request Idle Time
 
-The amount of time it takes from the pull request submitted until review
-begins.
-
-Practically, the different between "PR created" and the first "PR
-review submitted" times.
+Idle time is the amount of time elapsed from "pull request created" to "first
+review submitted" across all merged and opened pull requests.

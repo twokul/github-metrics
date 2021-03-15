@@ -227,6 +227,15 @@ const github_metrics_1 = __nccwpck_require__(4580);
 const web_api_1 = __nccwpck_require__(3523);
 const slack_1 = __nccwpck_require__(465);
 const luxon_1 = __nccwpck_require__(895);
+/**
+ * The function that runs the following workflow:
+ *
+ * - Creates both Github and Slack clients
+ * - Generates a weekly pull requests report
+ * - Posts a message on Slack
+ *
+ * @public
+ */
 async function run({ githubOwner, githubRepo, githubToken, slackAppToken, slackChannelId, }) {
     try {
         const slack = new web_api_1.WebClient(slackAppToken);
@@ -403,35 +412,69 @@ class RepositoryReport {
         __classPrivateFieldSet(this, _startDate, startDate);
         __classPrivateFieldSet(this, _endDate, endDate);
     }
+    /**
+     * The name of the report.
+     */
     get name() {
         return `${__classPrivateFieldGet(this, _owner)}/${__classPrivateFieldGet(this, _repo)}`;
     }
+    /**
+     * Link to the Github Pull Request page with all pull requests listed in the
+     * report between start and end date.
+     */
     get url() {
         return `https://github.com/${__classPrivateFieldGet(this, _owner)}/${__classPrivateFieldGet(this, _repo)}/pulls?q=created:${__classPrivateFieldGet(this, _startDate)}..${__classPrivateFieldGet(this, _endDate)}`;
     }
+    /**
+     * The start date of the report.
+     */
     get startDate() {
         return __classPrivateFieldGet(this, _startDate);
     }
+    /**
+     * The end date of the report.
+     */
     get endDate() {
         return __classPrivateFieldGet(this, _endDate);
     }
+    /**
+     * The number of opened pull requests.
+     */
     get openedPullRequests() {
         return __classPrivateFieldGet(this, _pullRequests).filter((pr) => pr.state === github_client_1.PullRequestState.OPENED);
     }
+    /**
+     * The number of closed pull requests.
+     */
     get closedPullRequests() {
         return __classPrivateFieldGet(this, _pullRequests).filter((pr) => pr.state === github_client_1.PullRequestState.CLOSED);
     }
+    /**
+     * The number of merged pull requests.
+     */
     get mergedPullRequests() {
         return __classPrivateFieldGet(this, _pullRequests).filter((pr) => pr.state === github_client_1.PullRequestState.MERGED);
     }
+    /**
+     * The number of opened and merged pull requests.
+     */
     get mergedAndOpened() {
         return __classPrivateFieldGet(this, _pullRequests).filter((pullRequest) => pullRequest.state != github_client_1.PullRequestState.CLOSED);
     }
+    /**
+     * The number of pull requests against `release/*` branch.
+     */
     get hotfixes() {
         const hotfixes = __classPrivateFieldGet(this, _pullRequests).map((pr) => new pull_request_1.default(pr))
             .filter((pr) => pr.isHotfix);
         return hotfixes.length;
     }
+    /**
+     * Calculates the average time to merge for the merged pull requests.
+     *
+     * Time to merge is the amount of time elapsed from "pull request created" to
+     * "pull request merged".
+     */
     get averageTimeToMerge() {
         if (__classPrivateFieldGet(this, _pullRequests).length === 0) {
             return 0;
@@ -444,6 +487,14 @@ class RepositoryReport {
             .reduce((sum, value) => (sum += value), 0);
         return totalTimeToMerge / this.mergedPullRequests.length;
     }
+    /**
+     * Calculates the average review depth for all pull requests.
+     *
+     * This includes:
+     * - number of comments
+     * - number of reviews
+     * - number of reviewers
+     */
     get aggregatedReviewDepth() {
         const reviewDepth = {
             comments: 0,
@@ -461,6 +512,12 @@ class RepositoryReport {
         });
         return reviewDepth;
     }
+    /**
+     * Calculates the average idle time for the merged or opened pull requests.
+     *
+     * Idle time is the amount of time elapsed from "pull request created" to
+     * "first review submitted".
+     */
     get averageIdleTime() {
         if (__classPrivateFieldGet(this, _pullRequests).length === 0) {
             return 0;
