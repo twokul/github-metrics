@@ -27,20 +27,32 @@ class GithubMetrics {
         const pullRequests = await __classPrivateFieldGet(this, _githubClient).getPullRequestsByPeriod({
             owner,
             repo,
-            startDate,
-            endDate,
+            startDate: startDate.toString(),
+            endDate: endDate.toString(),
         });
-        return new repository_1.default({ pullRequests, owner, repo, startDate, endDate });
+        return new repository_1.default({
+            pullRequests,
+            owner,
+            repo,
+            startDate: startDate.toISODate(),
+            endDate: endDate.toISODate(),
+        });
     }
     async generateWeeklyReport({ owner, repo, }) {
         const { startDate, endDate } = date_1.generateDateRange(date_1.Period.WEEK);
         const pullRequests = await __classPrivateFieldGet(this, _githubClient).getPullRequestsByPeriod({
             owner,
             repo,
-            startDate,
-            endDate,
+            startDate: startDate.toString(),
+            endDate: endDate.toString(),
         });
-        return new repository_1.default({ pullRequests, owner, repo, startDate, endDate });
+        return new repository_1.default({
+            pullRequests,
+            owner,
+            repo,
+            startDate: startDate.toISODate(),
+            endDate: endDate.toISODate(),
+        });
     }
 }
 exports.default = GithubMetrics;

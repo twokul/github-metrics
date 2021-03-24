@@ -2,15 +2,14 @@ import * as core from '@actions/core';
 import GithubMetrics from './github-metrics';
 import { WebClient } from '@slack/web-api';
 import { constructSlackMessage } from './utils/slack';
-import { DateTime } from 'luxon';
 
 /**
  * The function that runs the following workflow:
- * 
+ *
  * - Creates both Github and Slack clients
- * - Generates a weekly pull requests report 
+ * - Generates a weekly pull requests report
  * - Posts a message on Slack
- * 
+ *
  * @public
  */
 export async function run({
@@ -35,12 +34,10 @@ export async function run({
       owner: githubOwner,
       repo: githubRepo,
     });
-    const formattedStartDate = DateTime.fromISO(weeklyReport.startDate).toISODate();
-    const formattedEndDate = DateTime.fromISO(weeklyReport.endDate).toISODate();
     const metricsDocumentationUrl = 'https://git.io/JqCGq';
 
     const message = constructSlackMessage({
-      header: `Weekly Metrics for ${weeklyReport.name} (${formattedStartDate} - ${formattedEndDate}) 📈`,
+      header: `Weekly Metrics for ${weeklyReport.name} (${weeklyReport.startDate} - ${weeklyReport.endDate}) 📈`,
       footer:
         '_This is an automated post by <https://git.io/JqZ6w|github-metrics>._',
       sections: [

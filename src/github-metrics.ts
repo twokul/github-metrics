@@ -20,11 +20,17 @@ export default class GithubMetrics {
     const pullRequests = await this.#githubClient.getPullRequestsByPeriod({
       owner,
       repo,
-      startDate,
-      endDate,
+      startDate: startDate.toString(),
+      endDate: endDate.toString(),
     });
 
-    return new RepositoryReport({ pullRequests, owner, repo, startDate, endDate });
+    return new RepositoryReport({
+      pullRequests,
+      owner,
+      repo,
+      startDate: startDate.toISODate(),
+      endDate: endDate.toISODate(),
+    });
   }
 
   async generateWeeklyReport({
@@ -38,10 +44,16 @@ export default class GithubMetrics {
     const pullRequests = await this.#githubClient.getPullRequestsByPeriod({
       owner,
       repo,
-      startDate,
-      endDate,
+      startDate: startDate.toString(),
+      endDate: endDate.toString(),
     });
 
-    return new RepositoryReport({ pullRequests, owner, repo, startDate, endDate });
+    return new RepositoryReport({
+      pullRequests,
+      owner,
+      repo,
+      startDate: startDate.toISODate(),
+      endDate: endDate.toISODate(),
+    });
   }
 }
