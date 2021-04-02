@@ -6,9 +6,12 @@ export enum Period {
   MONTH = 'month',
 }
 
-export function generateDateRange(
-  period = Period.DAY
-): { startDate: DateTime; endDate: DateTime } {
+export type DateRange = {
+  startDate: DateTime;
+  endDate: DateTime;
+};
+
+export function generateDateRange(period = Period.DAY): DateRange {
   const today = DateTime.now();
 
   const startDate = today.startOf(period);
