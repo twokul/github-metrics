@@ -41,6 +41,7 @@
     "@octokit/graphql": "^4.6.1",
     "@slack/web-api": "^6.1.0",
     "luxon": "^1.26.0",
+    "winston": "^3.3.3",
     "yargs": "^16.2.0"
   },
   "jest": {

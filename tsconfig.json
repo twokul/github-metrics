@@ -11,9 +11,10 @@
     "noImplicitReturns": true,
     "rootDir": "src",
     "types": ["node"],
-    "esModuleInterop": false,
+    "esModuleInterop": true,
     "skipLibCheck": false,
-    "forceConsistentCasingInFileNames": true
+    "forceConsistentCasingInFileNames": true,
+    "experimentalDecorators": true
   },
   "include": ["src/**/*.ts"]
 }

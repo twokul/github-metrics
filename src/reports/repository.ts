@@ -1,5 +1,7 @@
+import { Interval } from 'luxon';
 import { PullRequest, PullRequestState } from '../github-client';
 import PullRequestReport, { PullRequestReviewDepth } from './pull-request';
+import { humanFormattedInterval } from '../utils/date';
 
 export default class RepositoryReport {
   #owner;
@@ -7,29 +9,23 @@ export default class RepositoryReport {
   #repo;
 
   #pullRequests;
-
-  #startDate;
-
-  #endDate;
+  #interval;
 
   constructor({
     owner,
     repo,
     pullRequests,
-    startDate,
-    endDate,
+    interval,
   }: {
     owner: string;
     repo: string;
     pullRequests: Array<PullRequest>;
-    startDate: string;
-    endDate: string;
+    interval: Interval;
   }) {
     this.#owner = owner;
     this.#repo = repo;
     this.#pullRequests = pullRequests;
-    this.#startDate = startDate;
-    this.#endDate = endDate;
+    this.#interval = interval;
   }
 
   /**
@@ -44,23 +40,18 @@ export default class RepositoryReport {
    * report between start and end date.
    */
   get url(): string {
-    return `https://github.com/${this.#owner}/${this.#repo}/pulls?q=created:${
-      this.#startDate
-    }..${this.#endDate}`;
+    let intervalString = `${this.#interval.start.toISO()}..${this.#interval.end.toISO()}`;
+    return `https://github.com/${this.#owner}/${
+      this.#repo
+    }/pulls?q=created:${intervalString}`;
   }
 
   /**
-   * The start date of the report.
+   * Returns a verbose but human-readable interval, like
+   * "April 20, 2017, 11:32 AM EDT to April 28, 2017, 11:32 AM EDT"
    */
-  get startDate(): string {
-    return this.#startDate;
-  }
-
-  /**
-   * The end date of the report.
-   */
-  get endDate(): string {
-    return this.#endDate;
+  get humanFormattedInterval(): string {
+    return humanFormattedInterval(this.#interval);
   }
 
   /**
@@ -112,7 +103,7 @@ export default class RepositoryReport {
 
   /**
    * Calculates the average time to merge for the merged pull requests.
-   * 
+   *
    * Time to merge is the amount of time elapsed from "pull request created" to
    * "pull request merged".
    */
@@ -134,7 +125,7 @@ export default class RepositoryReport {
 
   /**
    * Calculates the average review depth for all pull requests.
-   * 
+   *
    * This includes:
    * - number of comments
    * - number of reviews
@@ -164,7 +155,7 @@ export default class RepositoryReport {
 
   /**
    * Calculates the average idle time for the merged or opened pull requests.
-   * 
+   *
    * Idle time is the amount of time elapsed from "pull request created" to
    * "first review submitted".
    */

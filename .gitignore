@@ -71,4 +71,4 @@ temp
 # Ignore `dist` folder but do not ignore this as these two get deployed
 dist
 !dist/index.js
-!dist/licenses.txt
+!dist/licenses.txt.env

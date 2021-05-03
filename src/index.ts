@@ -37,7 +37,7 @@ export async function run({
     const metricsDocumentationUrl = 'https://git.io/JqCGq';
 
     const message = constructSlackMessage({
-      header: `Weekly Metrics for ${weeklyReport.name} (${weeklyReport.startDate} - ${weeklyReport.endDate}) 📈`,
+      header: `Weekly Metrics for ${weeklyReport.name} (${weeklyReport.humanFormattedInterval}) 📈`,
       footer:
         '_This is an automated post by <https://git.io/JqZ6w|github-metrics>._',
       sections: [
@@ -79,7 +79,7 @@ export async function run({
     const result = await slack.chat.postMessage(message);
 
     core.debug(
-      `Successfully send message ${result.ts} in conversation ${slackChannelId}`
+      `Successfully sent message ${result.ts} in conversation ${slackChannelId}`
     );
   } catch (error) {
     core.setFailed(error.message);
