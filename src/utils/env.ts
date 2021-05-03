@@ -12,11 +12,11 @@ const DEFAULT_GITHUB_REPO = 'Iverson';
 
 export function githubGraphqlClient() {
   let args = githubArgs();
-  const options: RequestParameters = {
-    headers: {
-      authorization: `token ${args.token}`,
-    },
-  };
+  let options: RequestParameters = {};
+
+  if (args.token) {
+    options.headers = { authorization: `token ${args.token}` };
+  }
 
   return graphql.defaults(options);
 }

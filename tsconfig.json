@@ -10,10 +10,11 @@
     "noUnusedLocals": true,
     "noImplicitReturns": true,
     "rootDir": "src",
-    "types": [],
+    "types": ["node"],
     "esModuleInterop": false,
     "skipLibCheck": false,
-    "forceConsistentCasingInFileNames": true
+    "forceConsistentCasingInFileNames": true,
+    "experimentalDecorators": true
   },
   "include": ["src/**/*.ts"]
 }
