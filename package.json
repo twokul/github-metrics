@@ -10,12 +10,14 @@
     "compile": "yarn build && ncc build dist/index.js --license licenses.txt",
     "dev": "yarn build --watch --preserveWatchOutput",
     "lint": "eslint src --ext ts",
-    "test": "jest",
+    "test": "jest tests",
+    "test:record-requests": "rm -rf tests/fixtures/__recordings__ && RECORD_REQUESTS=true yarn run test",
     "api-report": "api-extractor run",
     "api-docs": "api-documenter markdown -i temp -o docs",
     "build-with-docs": "yarn build && yarn api-report && yarn api-docs"
   },
   "devDependencies": {
+    "@babel/core": "^7",
     "@babel/plugin-proposal-decorators": "^7.13.15",
     "@babel/preset-env": "^7.13.10",
     "@babel/preset-typescript": "^7.13.0",

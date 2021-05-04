@@ -4,7 +4,7 @@ import { loadPullRequest } from '../../src/models/pull-request';
 import setupPolly from '../setup-polly';
 
 describe('model: PullRequest', () => {
-  let context = setupPolly();
+  setupPolly();
 
   describe('timeToMerge', () => {
     for (let prData of [
@@ -13,7 +13,6 @@ describe('model: PullRequest', () => {
       { number: 3, description: 'reopened', timeToMerge: 309000 },
     ]) {
       test(`PR: ${prData.description}`, async () => {
-        context.polly.configure({ recordIfMissing: true });
         let pr = await loadPullRequest(prData.number);
 
         expect(pr.timeToMerge && pr.timeToMerge.toObject()).toStrictEqual({
