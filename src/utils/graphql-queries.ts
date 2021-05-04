@@ -1,4 +1,22 @@
 import { githubArgs } from './env';
+import { Interval } from 'luxon';
+
+export function mergedPullRequests(interval: Interval): string {
+  let { repo, owner } = githubArgs();
+  let intervalStr = interval
+    .toISO({ suppressMilliseconds: true })
+    .replace('/', '..');
+  return `
+  query {
+    search(query: "repo:${owner}/${repo} is:pr merged:${intervalStr} sort:updated-desc", type:ISSUE, first:100) {
+      nodes {
+        ...on PullRequest {
+          number
+        }
+      }
+    }
+  }`;
+}
 
 export function singlePullRequest(number: number): string {
   let { repo, owner } = githubArgs();

@@ -75,11 +75,11 @@ export class PullRequest {
   }
 
   @memoize()
-  get timeToMerge(): Duration | void {
+  get timeToMerge(): Duration | undefined {
     let debug = this.debug.extend('timeToMerge');
     if (!this.data.merged) {
       debug('not merged, returning');
-      return;
+      return undefined;
     }
 
     if (this.openedForReviewAt && this.mergedAt) {
@@ -91,6 +91,8 @@ export class PullRequest {
         this.mergedAt
       );
       return diff;
+    } else {
+      return undefined;
     }
   }
 
