@@ -16,6 +16,11 @@ describe('model: PullRequest', () => {
         description: 'opened and then review requested',
         timeToMerge: 111000,
       },
+      {
+        number: 10,
+        description: 'opened and then review requested then closed/reopened',
+        timeToMerge: 46000,
+      },
     ]) {
       test(`PR: ${prData.description}`, async () => {
         let pr = await loadPullRequest(prData.number);
