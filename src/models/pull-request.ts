@@ -114,7 +114,7 @@ export class PullRequest {
       ({ kind }) => kind === 'ReopenedEvent'
     );
     if (lastReopened) {
-      eventsAsc = eventsAsc.slice(eventsAsc.indexOf(lastReopened));
+      eventsAsc = eventsAsc.slice(eventsAsc.lastIndexOf(lastReopened));
     }
 
     // Last ReadyForReview
