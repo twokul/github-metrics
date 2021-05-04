@@ -2,17 +2,12 @@ import { githubGraphqlClient } from '../utils/env';
 import { singlePullRequest } from '../utils/graphql-queries';
 import { DateTime, Duration } from 'luxon';
 import { memoize } from '../utils/decorators';
+import debugBase, { Debugger } from 'debug';
 export async function loadPullRequest(number: number): Promise<PullRequest> {
   let graphql = githubGraphqlClient();
   let data: any = await graphql(singlePullRequest(number));
   return new PullRequest(data.repository.pullRequest as GraphQLPRData);
 }
-
-const logger = {
-  debug(message: string) {
-    console.log(message);
-  },
-};
 
 function findLast<T>(arr: Array<T>, predicate: (item: T) => boolean): T | null {
   for (let i = arr.length - 1; i >= 0; i--) {
@@ -69,22 +64,33 @@ export class PullRequest {
   number: number;
   mergedAt: DateTime | undefined;
   createdAt: DateTime;
+  debug: Debugger;
   constructor(public data: GraphQLPRData) {
     if (data.mergedAt) {
       this.mergedAt = DateTime.fromISO(data.mergedAt);
     }
     this.number = data.number;
     this.createdAt = DateTime.fromISO(data.createdAt);
+    this.debug = debugBase('pull-request:' + this.number);
   }
 
   @memoize()
   get timeToMerge(): Duration | void {
+    let debug = this.debug.extend('timeToMerge');
     if (!this.data.merged) {
+      debug('not merged, returning');
       return;
     }
 
     if (this.openedForReviewAt && this.mergedAt) {
-      return this.mergedAt.diff(this.openedForReviewAt);
+      let diff = this.mergedAt.diff(this.openedForReviewAt);
+      debug(
+        'return %o (openedForReviewAt: %s -> mergedAt: %s)',
+        diff.toObject(),
+        this.openedForReviewAt,
+        this.mergedAt
+      );
+      return diff;
     }
   }
 
@@ -106,6 +112,7 @@ export class PullRequest {
   //   - OR: first ReviewRequested
   @memoize()
   get openedForReviewAt(): DateTime | void {
+    let debug = this.debug.extend('openedForReviewAt');
     let eventsAsc = this.timelineItemsAsc;
 
     // If the PR was ever closed, only look at events *since* it was reopened
@@ -128,35 +135,25 @@ export class PullRequest {
 
     let openedForReviewAt = null;
     if (lastReadyForReview) {
-      logger.debug(
-        `PR #${this.data.number} openedForReviewAt found lastReadyForReview: ${lastReadyForReview.datetime}`
-      );
+      debug(`found lastReadyForReview: ${lastReadyForReview.datetime}`);
       openedForReviewAt = lastReadyForReview.datetime;
     } else if (firstReviewRequested) {
       // If no ReadyForReview, this was never in Draft state
       // Find first "ReviewRequested" instead
-      logger.debug(
-        `PR #${this.data.number} openedForReviewAt found firstReviewRequested: ${firstReviewRequested.datetime}`
-      );
+      debug(`found firstReviewRequested: ${firstReviewRequested.datetime}`);
       openedForReviewAt = firstReviewRequested.datetime;
     } else {
       // Otherwise, this PR was opened up in non-draft-state
       if (lastReopened) {
-        logger.debug(
-          `PR #${this.data.number} openedForReviewAt using lastReopened: ${lastReopened.datetime}`
-        );
+        this.debug(`using lastReopened: ${lastReopened.datetime}`);
         openedForReviewAt = lastReopened.datetime;
       } else {
-        logger.debug(
-          `PR #${this.data.number} openedForReviewAt defaulting to createdAt: ${this.createdAt}`
-        );
+        this.debug(`defaulting to createdAt: ${this.createdAt}`);
         openedForReviewAt = this.createdAt;
       }
     }
 
-    logger.debug(
-      `PR: #${this.number} openedForReviewAt RETURN ${openedForReviewAt}`
-    );
+    debug(`RETURN ${openedForReviewAt}`);
     return openedForReviewAt;
   }
 }
