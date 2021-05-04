@@ -59,7 +59,6 @@ type TimelineItem = {
     | 'PullRequestReview'
     | 'ReviewRequestedEvent'
     | 'ReopenedEvent'
-    | 'ReviewRequested'
     | 'ReadyForReviewEvent';
   datetime: DateTime;
   login: string;
@@ -124,7 +123,7 @@ export class PullRequest {
       ({ kind }) => kind === 'ReadyForReviewEvent'
     );
     let firstReviewRequested = eventsAsc.find(
-      ({ kind }) => kind === 'ReviewRequested'
+      ({ kind }) => kind === 'ReviewRequestedEvent'
     );
 
     let openedForReviewAt = null;
@@ -143,8 +142,14 @@ export class PullRequest {
     } else {
       // Otherwise, this PR was opened up in non-draft-state
       if (lastReopened) {
+        logger.debug(
+          `PR #${this.data.number} openedForReviewAt using lastReopened: ${lastReopened.datetime}`
+        );
         openedForReviewAt = lastReopened.datetime;
       } else {
+        logger.debug(
+          `PR #${this.data.number} openedForReviewAt defaulting to createdAt: ${this.createdAt}`
+        );
         openedForReviewAt = this.createdAt;
       }
     }
