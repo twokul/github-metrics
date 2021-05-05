@@ -25,6 +25,6 @@ describe('utils:durationToHuman', () => {
       durationToHuman(
         Duration.fromObject({ days: 0, hours: 0, minutes: 0, seconds: 25 })
       )
-    ).toBe('25 minutes');
+    ).toBe('25 seconds');
   });
 });

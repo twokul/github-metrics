@@ -1,23 +1,28 @@
 import { Duration } from 'luxon';
 
+function pluralize(str, val) {
+  return val === 1 ? str : str + 's';
+}
+
 export default function durationToHuman(duration: Duration): string {
   let out = '';
 
-  let days = duration.as('days');
-  let minutes = duration.as('minutes');
-  let hours = duration.as('hours');
-  let seconds = duration.as('seconds');
+  duration = duration.normalize();
+  let days = duration.get('days');
+  let minutes = duration.get('minutes');
+  let hours = duration.get('hours');
+  let seconds = duration.get('seconds');
 
   if (days > 0) {
-    out += `${days} day${days !== 1 && 's'}`;
-    out += `${hours} hour${hours !== 1 && 's'}`;
+    out += `${days} ${pluralize('day', days)}`;
+    out += ` ${hours} ${pluralize('hour', hours)}`;
   } else if (hours > 0) {
-    out += `${hours} hour${hours !== 1 && 's'}`;
-    out += `${minutes} minute${minutes !== 1 && 's'}`;
+    out += `${hours} ${pluralize('hour', hours)}`;
+    out += ` ${minutes} ${pluralize('minute', minutes)}`;
   } else if (minutes > 0) {
-    out += `${minutes} minute${minutes !== 1 && 's'}`;
+    out += `${minutes} ${pluralize('minute', minutes)}`;
   } else {
-    out += `${seconds} second${seconds !== 1 && 's'}`;
+    out += `${seconds} ${pluralize('second', seconds)}`;
   }
 
   return out;
