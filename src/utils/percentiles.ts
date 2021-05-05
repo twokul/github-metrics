@@ -1,7 +1,7 @@
 function validateNumbers(arr: number[]) {
   for (let number of arr) {
     if (!Number.isFinite(number)) {
-      throw new Error(`Unexpected non-numeric value: ${number}`);
+      throw new Error(`percentiles: Unexpected non-numeric value: ${number}`);
     }
   }
 }
@@ -9,10 +9,10 @@ function validateNumbers(arr: number[]) {
 function validateNumbersInRange(arr: number[], min: number, max: number) {
   for (let number of arr) {
     if (number < min) {
-      throw new Error(`Unexpected number ${number} < ${min}`);
+      throw new Error(`percentiles: Unexpected number ${number} < ${min}`);
     }
     if (number > max) {
-      throw new Error(`Unexpected number ${number} > ${max}`);
+      throw new Error(`percentiles: Unexpected number ${number} > ${max}`);
     }
   }
 }
@@ -23,6 +23,9 @@ function validatePercentiles(arr: number[]) {
 }
 
 function validateData(arr: number[]) {
+  if (arr.length === 0) {
+    throw new Error(`percentiles: No data`);
+  }
   validateNumbers(arr);
 }
 

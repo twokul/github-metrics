@@ -20,4 +20,8 @@ describe('utils:percentiles', () => {
     expect(() => percentiles([50], [undefined])).toThrowError();
     expect(() => percentiles([50], [null])).toThrowError();
   });
+
+  test('throws if no data is given', () => {
+    expect(() => percentiles([50], [])).toThrowError();
+  });
 });
