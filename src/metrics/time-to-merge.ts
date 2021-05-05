@@ -17,7 +17,7 @@ export default class TimeToMergeMetric implements Metric {
   get summary(): string {
     let values = this.data.map((row) => row.value);
     if (values.length === 0) {
-      return `No data`;
+      return 'No data';
     }
 
     let [p0, p50, p90, p100] = percentiles([0, 50, 90, 100], this);
