@@ -2,6 +2,9 @@ import * as core from '@actions/core';
 import GithubMetrics from './github-metrics';
 import { WebClient } from '@slack/web-api';
 import { constructSlackMessage } from './utils/slack';
+import TimeToMergeMetric from './metrics/time-to-merge';
+import { setGithubArgs } from './utils/env';
+import { Interval, DateTime } from 'luxon';
 
 /**
  * The function that runs the following workflow:
@@ -25,6 +28,8 @@ export async function run({
   slackAppToken: string;
   slackChannelId: string;
 }): Promise<void> {
+  setGithubArgs(githubOwner, githubRepo, githubToken);
+
   try {
     const slack = new WebClient(slackAppToken);
     const githubMetrics = new GithubMetrics({
@@ -35,6 +40,12 @@ export async function run({
       repo: githubRepo,
     });
     const metricsDocumentationUrl = 'https://git.io/JqCGq';
+
+    let end = DateTime.now();
+    let start = end.minus({ weeks: 1 });
+    let thisWeek = Interval.fromDateTimes(start, end);
+    const timeToMerge = new TimeToMergeMetric(thisWeek);
+    await timeToMerge.run();
 
     const message = constructSlackMessage({
       header: `Weekly Metrics for ${weeklyReport.name} (${weeklyReport.startDate} - ${weeklyReport.endDate}) 📈`,
@@ -54,11 +65,7 @@ export async function run({
           text: `Number Of Pull Requests Closed: *${weeklyReport.closedPullRequests.length}*`,
         },
         {
-          text: `Average Time To Merge: *${
-            weeklyReport.averageTimeToMerge
-              ? weeklyReport.averageTimeToMerge.toFixed(1)
-              : null
-          } hours*`,
+          text: ['Time To Merge', timeToMerge.summary].join('\n'),
         },
         {
           text: `Average Pull Request Idle Time: *${
