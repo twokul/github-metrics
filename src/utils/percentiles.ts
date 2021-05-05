@@ -37,12 +37,16 @@ function getPercentileValue(p: number, sortedData: number[]) {
   return sortedData[kIndex];
 }
 
+function sortNumeric(arr: number[]): number[] {
+  return arr.slice().sort((a, b) => (a < b ? -1 : a === b ? 0 : 1));
+}
+
 export default function percentiles(
   ps: number[],
   unsortedData: number[]
 ): number[] {
   validateData(unsortedData);
   validatePercentiles(ps);
-  let sortedData = unsortedData.slice().sort();
+  let sortedData = sortNumeric(unsortedData);
   return ps.map((p) => getPercentileValue(p, sortedData));
 }
