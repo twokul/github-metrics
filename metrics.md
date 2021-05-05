@@ -33,10 +33,25 @@ The number of pull requests against `release/*` branch.
 The aggregated number of comments, reviews and reviewers across all pull
 requests.
 
-## Average Time to Merge
+## Time to Merge
 
-Time to merge is the amount of time elapsed from "pull request created" to
-"pull request merged" across all merged pull requests.
+Time to Merge measured from when the pull request is "opened for review" to when it is merged.
+
+"opened for review" is determined using a heuristic:
+
+- If a PR was ever closed, disregard any events before it was closed
+- If the PR was ever in draft state, return the time it was marked "ready for review"
+- If the PR was never in draft state but a review was requested, use the time of the first review request
+  - (It's possible for a PR to have a review request after merging, to disregard the review request in that case)
+- Default to the PR's "createdAt" time
+
+The slack report includes p0, p50, p90 and p100 values.
+Here's how to reason about those:
+
+- p0: The shorted time-to-merge
+- p50: Same as the median: 50% of the PRs were merged in this time
+- p90: 90% of PRs were merged in this time
+- p100: The slowest-to-merge PR
 
 ## Average Pull Request Idle Time
 
