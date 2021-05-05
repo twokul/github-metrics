@@ -4,7 +4,7 @@ import { WebClient } from '@slack/web-api';
 import { constructSlackMessage } from './utils/slack';
 import TimeToMergeMetric from './metrics/time-to-merge';
 import { setGithubArgs } from './utils/env';
-import { Interval, DateTime } from 'luxon';
+import { getInterval, Period } from './utils/date';
 
 /**
  * The function that runs the following workflow:
@@ -41,10 +41,7 @@ export async function run({
     });
     const metricsDocumentationUrl = 'https://git.io/JqCGq';
 
-    let end = DateTime.now();
-    let start = end.minus({ weeks: 1 });
-    let thisWeek = Interval.fromDateTimes(start, end);
-    const timeToMerge = new TimeToMergeMetric(thisWeek);
+    const timeToMerge = new TimeToMergeMetric(getInterval(Period.WEEK));
     await timeToMerge.run();
 
     const message = constructSlackMessage({
