@@ -39,9 +39,7 @@ export default function setup() {
     },
     recordIfMissing: Boolean(process.env.RECORD_REQUESTS),
     matchRequestsBy: {
-      headers: {
-        exclude: ['authorization', 'user-agent'],
-      },
+      headers: false,
     },
   });
 }
