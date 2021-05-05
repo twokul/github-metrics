@@ -3,7 +3,7 @@ import { githubGraphqlClient } from '../../utils/env';
 import { mergedPullRequests } from '../../utils/graphql-queries';
 import { loadPullRequest } from '../../models/pull-request';
 import debugBase, { Debugger } from 'debug';
-import percentiles from '../../utils/percentile';
+import percentiles from '../../utils/percentiles';
 
 type MetricRow = {
   name: string;
