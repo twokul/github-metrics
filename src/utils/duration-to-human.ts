@@ -1,13 +1,13 @@
 import { Duration } from 'luxon';
 
-function pluralize(str, val) {
+function pluralize(str: string, val: number) {
   return val === 1 ? str : str + 's';
 }
 
 export default function durationToHuman(duration: Duration): string {
   let out = '';
 
-  duration = duration.normalize();
+  duration = duration.shiftTo('days', 'hours', 'minutes', 'seconds');
   let days = duration.get('days');
   let minutes = duration.get('minutes');
   let hours = duration.get('hours');
