@@ -7,8 +7,8 @@ describe('metric: TimeToMerge', () => {
   setupPolly();
 
   test('value is correct for test repo', async () => {
-    let start = DateTime.fromISO('2021-05-04T18:00:00Z');
-    let end = DateTime.fromISO('2021-05-05T20:00:00Z');
+    let start = DateTime.fromISO('2021-05-04T18:00:00Z').toUTC();
+    let end = DateTime.fromISO('2021-05-05T20:00:00Z').toUTC();
     let interval = Interval.fromDateTimes(start, end);
 
     let metric = new TimeToMergeMetric(interval);
@@ -25,7 +25,7 @@ describe('metric: TimeToMerge', () => {
   });
 
   test('no problems for test repo when no merged PRs are found', async () => {
-    let start = DateTime.fromISO('2021-05-04T18:00:00Z');
+    let start = DateTime.fromISO('2021-05-04T18:00:00Z').toUTC();
     let end = start.plus({ minutes: 1 });
     let interval = Interval.fromDateTimes(start, end);
 
