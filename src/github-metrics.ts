@@ -1,6 +1,7 @@
+import { Interval } from 'luxon';
 import GithubClient from './github-client';
 import RepositoryReport from './reports/repository';
-import { DateRange, generateDateRange, Period } from './utils/date';
+import { getInterval, Period } from './utils/date';
 
 export default class GithubMetrics {
   #githubClient;
@@ -12,26 +13,25 @@ export default class GithubMetrics {
   async generateReport({
     owner,
     repo,
-    dateRange,
+    interval,
   }: {
     owner: string;
     repo: string;
-    dateRange: DateRange;
+    interval: Interval;
   }) {
-    const { startDate, endDate } = dateRange;
     const pullRequests = await this.#githubClient.getPullRequestsByPeriod({
       owner,
       repo,
-      startDate: startDate.toString(),
-      endDate: endDate.toString(),
+      startDate: interval.start.toString(),
+      endDate: interval.end.toString(),
     });
 
     return new RepositoryReport({
       pullRequests,
       owner,
       repo,
-      startDate: startDate.toISODate(),
-      endDate: endDate.toISODate(),
+      startDate: interval.start.toISODate(),
+      endDate: interval.end.toISODate(),
     });
   }
 
@@ -45,7 +45,7 @@ export default class GithubMetrics {
     return this.generateReport({
       owner,
       repo,
-      dateRange: generateDateRange(Period.DAY),
+      interval: getInterval(Period.DAY),
     });
   }
 
@@ -59,7 +59,7 @@ export default class GithubMetrics {
     return this.generateReport({
       owner,
       repo,
-      dateRange: generateDateRange(Period.WEEK),
+      interval: getInterval(Period.WEEK),
     });
   }
 }

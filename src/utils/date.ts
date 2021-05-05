@@ -1,4 +1,4 @@
-import { DateTime } from 'luxon';
+import { DateTime, Interval } from 'luxon';
 
 export enum Period {
   DAY = 'day',
@@ -6,19 +6,9 @@ export enum Period {
   MONTH = 'month',
 }
 
-export type DateRange = {
-  startDate: DateTime;
-  endDate: DateTime;
-};
+export function getInterval(period = Period.DAY): Interval {
+  const end = DateTime.utc();
+  const start = end.minus({ [period]: 1 });
 
-export function generateDateRange(period = Period.DAY): DateRange {
-  const today = DateTime.now();
-
-  const startDate = today.startOf(period);
-  const endDate = today.endOf(period);
-
-  return {
-    startDate,
-    endDate,
-  };
+  return Interval.fromDateTimes(start, end);
 }

@@ -1,34 +1,35 @@
-import { Period, generateDateRange } from '../../src/utils/date';
+import { Period, getInterval } from '../../src/utils/date';
 import * as td from 'testdouble';
 import { DateTime } from 'luxon';
 
+const STUBBED_NOW = DateTime.fromISO('2021-03-11T17:35:54.00Z').toUTC();
+const NOW_TO_ISO = '2021-03-11T17:35:54.000Z';
+
 describe('Date Utils', () => {
   beforeAll(() => {
-    td.replace(DateTime, 'now', () => {
-      return DateTime.fromISO('2021-03-11T17:35:54Z');
-    });
+    td.replace(DateTime, 'utc', () => STUBBED_NOW);
   });
 
   afterAll(() => td.reset());
 
   test('generates correct date for day', () => {
-    const { startDate, endDate } = generateDateRange();
+    const interval = getInterval();
 
-    expect(startDate.toISODate()).toEqual('2021-03-11');
-    expect(endDate.toISODate()).toEqual('2021-03-11');
+    expect(interval.start.toISO()).toEqual('2021-03-10T17:35:54.000Z');
+    expect(interval.end.toISO()).toEqual(NOW_TO_ISO);
   });
 
   test('generates correct date for week', () => {
-    const { startDate, endDate } = generateDateRange(Period.WEEK);
+    const interval = getInterval(Period.WEEK);
 
-    expect(startDate.toISODate()).toEqual('2021-03-08');
-    expect(endDate.toISODate()).toEqual('2021-03-14');
+    expect(interval.start.toISO()).toEqual('2021-03-04T17:35:54.000Z');
+    expect(interval.end.toISO()).toEqual(NOW_TO_ISO);
   });
 
   test('generates correct date for month', () => {
-    const { startDate, endDate } = generateDateRange(Period.MONTH);
+    const interval = getInterval(Period.MONTH);
 
-    expect(startDate.toISODate()).toEqual('2021-03-01');
-    expect(endDate.toISODate()).toEqual('2021-03-31');
+    expect(interval.start.toISO()).toEqual('2021-02-11T17:35:54.000Z');
+    expect(interval.end.toISO()).toEqual(NOW_TO_ISO);
   });
 });
