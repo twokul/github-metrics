@@ -3,6 +3,7 @@ import { githubGraphqlClient } from '../../utils/env';
 import { mergedPullRequests } from '../../utils/graphql-queries';
 import { loadPullRequest } from '../../models/pull-request';
 import debugBase, { Debugger } from 'debug';
+import percentiles from '../../utils/percentile';
 
 type MetricRow = {
   name: string;
@@ -13,12 +14,24 @@ type MetricRow = {
 
 export default class TimeToMergeMetric {
   debug: Debugger;
+  data?: MetricRow[];
   constructor(public interval: Interval) {
     this.debug = debugBase('metrics:time-to-merge');
   }
 
   get title(): string {
     return `Pull Request Time To Merge, PRs merged during ${this.interval.toISO()}`;
+  }
+
+  get summary(): string {
+    if (!this.data) {
+      throw new Error(`Cannot get summary before loading data`);
+    }
+    // let [p0, p50, p90, p100] = percentiles(
+    //   [0, 50, 90, 100],
+    //   this.data.map((row) => row.value);
+    // );
+    return '';
   }
 
   async fetchMergedPullRequestNumbers(): Promise<number[]> {
@@ -29,7 +42,7 @@ export default class TimeToMergeMetric {
 
   async run(): Promise<string> {
     let numbers = await this.fetchMergedPullRequestNumbers();
-    this.debug(`PR numbers: %o`, numbers);
+    this.debug(`found merged PR numbers: %o`, numbers);
 
     let data: MetricRow[] = [];
 
@@ -49,7 +62,7 @@ export default class TimeToMergeMetric {
      ## ${this.title} ##
      ${data
        .map((datum) => {
-         return `${datum.name}:\t${datum.formattedValue}`;
+         return `${datum.desc}:\t${datum.formattedValue}`;
        })
        .join('\n')}
     `;
