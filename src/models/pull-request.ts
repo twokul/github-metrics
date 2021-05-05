@@ -135,6 +135,17 @@ export class PullRequest {
       ({ kind }) => kind === 'ReviewRequestedEvent'
     );
 
+    if (
+      firstReviewRequested &&
+      this.mergedAt &&
+      firstReviewRequested.datetime > this.mergedAt
+    ) {
+      debug(
+        `firstReviewRequested was after mergedAt, ignoring (was: ${firstReviewRequested.datetime})`
+      );
+      firstReviewRequested = undefined;
+    }
+
     let openedForReviewAt = null;
     if (lastReadyForReview) {
       debug(`found lastReadyForReview: ${lastReadyForReview.datetime}`);
