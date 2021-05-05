@@ -111,30 +111,8 @@ export default class RepositoryReport {
   }
 
   /**
-   * Calculates the average time to merge for the merged pull requests.
-   * 
-   * Time to merge is the amount of time elapsed from "pull request created" to
-   * "pull request merged".
-   */
-  get averageTimeToMerge(): number {
-    if (this.#pullRequests.length === 0) {
-      return 0;
-    }
-
-    const totalTimeToMerge = this.mergedPullRequests
-      .map((pullRequest) => {
-        const analysis = new PullRequestReport(pullRequest);
-
-        return Number(analysis.timeToMerge.toFormat('h'));
-      })
-      .reduce((sum, value) => (sum += value), 0);
-
-    return totalTimeToMerge / this.mergedPullRequests.length;
-  }
-
-  /**
    * Calculates the average review depth for all pull requests.
-   * 
+   *
    * This includes:
    * - number of comments
    * - number of reviews
@@ -164,7 +142,7 @@ export default class RepositoryReport {
 
   /**
    * Calculates the average idle time for the merged or opened pull requests.
-   * 
+   *
    * Idle time is the amount of time elapsed from "pull request created" to
    * "first review submitted".
    */

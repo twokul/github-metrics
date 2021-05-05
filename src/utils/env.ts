@@ -32,3 +32,9 @@ export function githubArgs(): GithubArgs {
 
   return { owner, repo, token };
 }
+
+export function setGithubArgs(owner: string, repo: string, token: string) {
+  process.env.GITHUB_OWNER = owner;
+  process.env.GITHUB_REPO = repo;
+  process.env.GITHUB_TOKEN = token;
+}

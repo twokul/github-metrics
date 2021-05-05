@@ -1,5 +1,3 @@
-/** @jest-environment setup-polly-jest/jest-environment-node */
-
 import { loadPullRequest } from '../../src/models/pull-request';
 import setupPolly from '../setup-polly';
 
@@ -30,9 +28,9 @@ describe('model: PullRequest', () => {
       test(`PR: ${prData.description}`, async () => {
         let pr = await loadPullRequest(prData.number);
 
-        expect(pr.timeToMerge && pr.timeToMerge.toObject()).toStrictEqual({
-          milliseconds: prData.timeToMerge,
-        });
+        expect(pr.timeToMerge && pr.timeToMerge.toMillis()).toBe(
+          prData.timeToMerge
+        );
       });
     }
   });
