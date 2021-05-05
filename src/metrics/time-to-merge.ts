@@ -1,7 +1,7 @@
 import { Duration, Interval } from 'luxon';
 import { fetchMergedPullRequestNumbers } from '../utils/graphql-queries';
 import { loadPullRequest } from '../models/pull-request';
-import debugBase, { Debugger } from 'debug';
+import debug, { Debugger } from '../utils/debug';
 import durationToHuman from '../utils/duration-to-human';
 import { Metric, MetricData, percentiles } from '../metric';
 
@@ -10,7 +10,7 @@ export default class TimeToMergeMetric implements Metric {
   data: MetricData[];
   name = 'Pull Request Time-To-Merge';
   constructor(public interval: Interval) {
-    this.debug = debugBase('metrics:time-to-merge');
+    this.debug = debug.extend('metrics:time-to-merge');
     this.data = [];
   }
 

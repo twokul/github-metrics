@@ -1,17 +1,20 @@
 import { githubArgs } from './env';
 import { Interval } from 'luxon';
 import { githubGraphqlClient } from '../utils/env';
-import debugBase from 'debug';
+import debug from './debug';
 
-const debug = debugBase('graphql');
+const debugBase = debug.extend('graphql');
 
 export async function fetchMergedPullRequestNumbers(
   interval: Interval
 ): Promise<number[]> {
   let client = githubGraphqlClient();
   let data: any = await client(mergedPullRequestNumbersQuery(interval));
+  debugBase.extend('results:merged-pull-request-numbers:data')(
+    JSON.stringify(data)
+  );
   let result = data.search.nodes.map((node: any) => Number(node.number));
-  debug.extend('results:merged-pull-request-numbers:results')(result);
+  debugBase.extend('results:merged-pull-request-numbers')(result);
 
   return result;
 }
@@ -31,7 +34,7 @@ function mergedPullRequestNumbersQuery(interval: Interval): string {
       }
     }
   }`;
-  debug.extend('queries:merged-pull-request-numbers')(query);
+  debugBase.extend('queries:merged-pull-request-numbers')(query);
   return query;
 }
 

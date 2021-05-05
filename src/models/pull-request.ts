@@ -2,7 +2,7 @@ import { githubGraphqlClient } from '../utils/env';
 import { singlePullRequest } from '../utils/graphql-queries';
 import { DateTime, Duration } from 'luxon';
 import { memoize } from '../utils/decorators';
-import debugBase, { Debugger } from 'debug';
+import debug, { Debugger } from '../utils/debug';
 export async function loadPullRequest(number: number): Promise<PullRequest> {
   let graphql = githubGraphqlClient();
   let data: any = await graphql(singlePullRequest(number));
@@ -71,7 +71,7 @@ export class PullRequest {
     }
     this.number = data.number;
     this.createdAt = DateTime.fromISO(data.createdAt);
-    this.debug = debugBase('pull-request:' + this.number);
+    this.debug = debug.extend('pull-request:' + this.number);
   }
 
   @memoize()
