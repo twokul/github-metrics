@@ -13,8 +13,7 @@
     "types": ["node"],
     "esModuleInterop": false,
     "skipLibCheck": false,
-    "forceConsistentCasingInFileNames": true,
-    "experimentalDecorators": true
+    "forceConsistentCasingInFileNames": true
   },
   "include": ["src/**/*.ts"]
 }

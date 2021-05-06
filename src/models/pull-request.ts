@@ -1,7 +1,6 @@
 import { githubGraphqlClient } from '../utils/env';
 import { singlePullRequest } from '../utils/graphql-queries';
 import { DateTime, Duration } from 'luxon';
-import { memoize } from '../utils/decorators';
 import debug, { Debugger } from '../utils/debug';
 
 export async function loadPullRequest(number: number): Promise<PullRequest> {
@@ -66,6 +65,7 @@ export class PullRequest {
   mergedAt?: DateTime;
   createdAt: DateTime;
   debug: Debugger;
+  _memoizeCache: Map<string, any>;
   constructor(public data: GraphQLPRData) {
     if (data.mergedAt) {
       this.mergedAt = DateTime.fromISO(data.mergedAt);
@@ -73,32 +73,38 @@ export class PullRequest {
     this.number = data.number;
     this.createdAt = DateTime.fromISO(data.createdAt);
     this.debug = debug.extend('pull-request:' + this.number);
+    this._memoizeCache = new Map();
   }
 
-  @memoize()
   get timeToMerge(): Duration | undefined {
-    let debug = this.debug.extend('timeToMerge');
-    if (!this.data.merged) {
-      debug('not merged, returning');
-      return undefined;
+    if (this._memoizeCache.has('timeToMerge')) {
+      return this._memoizeCache.get('timeToMerge');
     }
 
-    if (this.openedForReviewAt && this.mergedAt) {
-      let diff = this.mergedAt.diff(this.openedForReviewAt);
-      debug(
-        'return %o (openedForReviewAt: %s -> mergedAt: %s)',
-        diff.toObject(),
-        this.openedForReviewAt,
-        this.mergedAt
-      );
-      return diff;
-    } else {
-      return undefined;
+    let timeToMerge = undefined;
+    let debug = this.debug.extend('timeToMerge');
+    if (this.data.merged) {
+      if (this.openedForReviewAt && this.mergedAt) {
+        let diff = this.mergedAt.diff(this.openedForReviewAt);
+        debug(
+          'return %o (openedForReviewAt: %s -> mergedAt: %s)',
+          diff.toObject(),
+          this.openedForReviewAt,
+          this.mergedAt
+        );
+        timeToMerge = diff;
+      }
     }
+
+    this._memoizeCache.set('timeToMerge', timeToMerge);
+    return timeToMerge;
   }
 
-  @memoize()
   get timelineItemsAsc(): Array<TimelineItem> {
+    if (this._memoizeCache.has('timelineItemsAsc')) {
+      return this._memoizeCache.get('timelineItemsAsc');
+    }
+
     let events = this.data.timelineItems.nodes.map((node: any) => {
       let kind = node.__typename;
       let datetime = DateTime.fromISO(node.createdAt);
@@ -106,6 +112,8 @@ export class PullRequest {
       return { kind, datetime, login, node };
     });
     events.sort((a: any, b: any) => a.createdAt - b.createdAt);
+
+    this._memoizeCache.set('timelineItemsAsc', events);
     return events;
   }
 
@@ -113,8 +121,11 @@ export class PullRequest {
   // - only counting events that occur after the *last* "reopened" event (if any):
   //   - last "ReadyForReview" event occurs (aka convert FROM draft to open)
   //   - OR: first ReviewRequested
-  @memoize()
   get openedForReviewAt(): DateTime | undefined {
+    if (this._memoizeCache.has('openedForReviewAt')) {
+      return this._memoizeCache.get('openedForReviewAt');
+    }
+
     let debug = this.debug.extend('openedForReviewAt');
     let eventsAsc = this.timelineItemsAsc;
 
@@ -168,6 +179,7 @@ export class PullRequest {
     }
 
     debug(`RETURN ${openedForReviewAt}`);
+    this._memoizeCache.set('openedForReviewAt', openedForReviewAt);
     return openedForReviewAt;
   }
 }
