@@ -10,7 +10,7 @@
     "noUnusedLocals": true,
     "noImplicitReturns": true,
     "rootDir": "src",
-    "types": [],
+    "types": ["node"],
     "esModuleInterop": false,
     "skipLibCheck": false,
     "forceConsistentCasingInFileNames": true
