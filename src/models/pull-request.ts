@@ -3,6 +3,7 @@ import { singlePullRequest } from '../utils/graphql-queries';
 import { DateTime, Duration } from 'luxon';
 import { memoize } from '../utils/decorators';
 import debug, { Debugger } from '../utils/debug';
+
 export async function loadPullRequest(number: number): Promise<PullRequest> {
   let graphql = githubGraphqlClient();
   let data: any = await graphql(singlePullRequest(number));
@@ -62,7 +63,7 @@ type TimelineItem = {
 
 export class PullRequest {
   number: number;
-  mergedAt: DateTime | undefined;
+  mergedAt?: DateTime;
   createdAt: DateTime;
   debug: Debugger;
   constructor(public data: GraphQLPRData) {
@@ -113,7 +114,7 @@ export class PullRequest {
   //   - last "ReadyForReview" event occurs (aka convert FROM draft to open)
   //   - OR: first ReviewRequested
   @memoize()
-  get openedForReviewAt(): DateTime | void {
+  get openedForReviewAt(): DateTime | undefined {
     let debug = this.debug.extend('openedForReviewAt');
     let eventsAsc = this.timelineItemsAsc;
 
@@ -146,7 +147,7 @@ export class PullRequest {
       firstReviewRequested = undefined;
     }
 
-    let openedForReviewAt = null;
+    let openedForReviewAt = undefined;
     if (lastReadyForReview) {
       debug(`found lastReadyForReview: ${lastReadyForReview.datetime}`);
       openedForReviewAt = lastReadyForReview.datetime;

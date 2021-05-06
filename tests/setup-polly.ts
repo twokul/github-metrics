@@ -3,6 +3,8 @@ import * as path from 'path';
 // @ts-ignore
 import { setupPolly } from 'setup-polly-jest';
 
+let x: number[][] = [[0]];
+
 // @ts-ignore
 import FSPersister from '@pollyjs/persister-fs';
 
