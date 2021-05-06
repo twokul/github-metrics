@@ -1,8 +1,5 @@
 import { Duration } from 'luxon';
-
-function pluralize(str: string, val: number) {
-  return val === 1 ? str : str + 's';
-}
+import { pluralize } from './pluralize';
 
 /**
  * Returns a human-readable string representation of the duration.

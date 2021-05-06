@@ -28,7 +28,6 @@ describe('Repository Report', () => {
     expect(report.name).toEqual('Marvel/Avengers');
     expect(report.openedPullRequests).toEqual([]);
     expect(report.closedPullRequests).toEqual([]);
-    expect(report.mergedPullRequests).toEqual([]);
     expect(report.hotfixes).toEqual(0);
     expect(report.url).toEqual(
       'https://github.com/Marvel/Avengers/pulls?q=created:2021-03-08..2021-03-14'
@@ -59,7 +58,6 @@ describe('Repository Report', () => {
     expect(report.name).toEqual('Marvel/Avengers');
     expect(report.openedPullRequests.length).toEqual(15);
     expect(report.closedPullRequests.length).toEqual(19);
-    expect(report.mergedPullRequests.length).toEqual(14);
     expect(report.hotfixes).toEqual(0);
     expect(report.url).toEqual(
       'https://github.com/Marvel/Avengers/pulls?q=created:2021-03-08..2021-03-14'

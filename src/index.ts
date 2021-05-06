@@ -3,6 +3,7 @@ import GithubMetrics from './github-metrics';
 import { WebClient } from '@slack/web-api';
 import { constructSlackMessage } from './utils/slack';
 import TimeToMergeMetric from './metrics/time-to-merge';
+import MergedPRsMetric from './metrics/merged-prs';
 import { setGithubArgs } from './utils/env';
 import { getInterval, Period } from './utils/date';
 
@@ -41,8 +42,13 @@ export async function run({
     });
     const metricsDocumentationUrl = 'https://git.io/JqCGq';
 
-    const timeToMerge = new TimeToMergeMetric(getInterval(Period.WEEK));
+    const weekEndingNow = getInterval(Period.WEEK);
+
+    const timeToMerge = new TimeToMergeMetric(weekEndingNow);
     await timeToMerge.run();
+
+    const mergedPRs = new MergedPRsMetric(weekEndingNow);
+    await mergedPRs.run();
 
     const message = constructSlackMessage({
       header: `Weekly Metrics for ${weeklyReport.name} (${weeklyReport.startDate} - ${weeklyReport.endDate}) 📈`,
@@ -56,13 +62,13 @@ export async function run({
           text: `Number Of Pull Requests Opened: *${weeklyReport.openedPullRequests.length}*`,
         },
         {
-          text: `Number Of Pull Requests Merged: *${weeklyReport.mergedPullRequests.length}*`,
+          text: `${mergedPRs.name}: ${mergedPRs.summary}`,
         },
         {
           text: `Number Of Pull Requests Closed: *${weeklyReport.closedPullRequests.length}*`,
         },
         {
-          text: ['Time To Merge', timeToMerge.summary].join('\n'),
+          text: [timeToMerge.name, timeToMerge.summary].join('\n'),
         },
         {
           text: `Average Pull Request Idle Time: *${

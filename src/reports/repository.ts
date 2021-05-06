@@ -82,15 +82,6 @@ export default class RepositoryReport {
   }
 
   /**
-   * The number of merged pull requests.
-   */
-  get mergedPullRequests(): Array<PullRequest> {
-    return this.#pullRequests.filter(
-      (pr) => pr.state === PullRequestState.MERGED
-    );
-  }
-
-  /**
    * The number of opened and merged pull requests.
    */
   get mergedAndOpened(): Array<PullRequest> {
