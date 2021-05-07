@@ -13,29 +13,34 @@ import { pluralize } from './pluralize';
  * Examples:
  *   durationToHuman(Duration.fromObject({days:5, hours:2,minutes:1, seconds:30})) -> "5 days 2 hours"
  *   durationToHuman(Duration.fromObject({hours:2,minutes:1, seconds:30})) -> "2 hours 1 minute"
- *   durationToHuman(Duration.fromObject({minutes:10, seconds:30})) -> "10 minutes"
+ *   durationToHuman(Duration.fromObject({minutes:10, seconds:30})) -> "10 minutes, 30 seconds"
  *   durationToHuman(Duration.fromObject({seconds:30})) -> "30 seconds"
  */
-export default function durationToHuman(duration: Duration): string {
-  let out = '';
-
+export function durationToHuman(duration: Duration): string {
   duration = duration.shiftTo('days', 'hours', 'minutes', 'seconds');
   let days = duration.get('days');
   let minutes = duration.get('minutes');
   let hours = duration.get('hours');
   let seconds = duration.get('seconds');
 
+  let parts = [];
+
   if (days > 0) {
-    out += `${days} ${pluralize('day', days)}`;
-    out += ` ${hours} ${pluralize('hour', hours)}`;
+    parts.push(`${days} ${pluralize('day', days)}`);
+    parts.push(`${hours} ${pluralize('hour', hours)}`);
   } else if (hours > 0) {
-    out += `${hours} ${pluralize('hour', hours)}`;
-    out += ` ${minutes} ${pluralize('minute', minutes)}`;
+    parts.push(`${hours} ${pluralize('hour', hours)}`);
+    parts.push(`${minutes} ${pluralize('minute', minutes)}`);
   } else if (minutes > 0) {
-    out += `${minutes} ${pluralize('minute', minutes)}`;
+    parts.push(`${minutes} ${pluralize('minute', minutes)}`);
+    parts.push(`${seconds} ${pluralize('second', seconds)}`);
   } else {
-    out += `${seconds} ${pluralize('second', seconds)}`;
+    parts.push(`${seconds} ${pluralize('second', seconds)}`);
   }
 
-  return out;
+  return parts.join(' ');
+}
+
+export function millisToHuman(millis: number): string {
+  return durationToHuman(Duration.fromMillis(millis));
 }
