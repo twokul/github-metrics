@@ -9,8 +9,8 @@ import { percentiles } from '../../src/metric';
  *  https://github.com/bantic/github-metrics-tests/actions/workflows/source-of-run-data.yml
  * 
  *  To view the source data locally, install `gh` and `jq` and run:
-    gh api /repos/bantic/github-metrics-tests/actions/workflows/source-of-run-data.yml/runs \
-      | jq '.workflow_runs[] | select(.conclusion == "success") | {id, created_at, updated_at}'
+    gh api -X GET /repos/bantic/github-metrics-tests/actions/workflows/source-of-run-data.yml/runs \
+      -f 'status=success' | jq '.workflow_runs[] | {id, created_at, updated_at}'
  */
 
 describe('metrics: WorkflowDuration', () => {
@@ -20,7 +20,6 @@ describe('metrics: WorkflowDuration', () => {
   const start = DateTime.fromISO('2021-05-09T22:30:00Z').toUTC();
   const end = DateTime.fromISO('2021-05-10T13:40:00Z').toUTC();
   const interval = Interval.fromDateTimes(start, end);
-  const PER_PAGE = 5; // small number ensures we test the pagination code
 
   test('fetches workflow run durations', async () => {
     let metric = new WorkflowDuration(interval, workflowId);
@@ -35,7 +34,7 @@ describe('metrics: WorkflowDuration', () => {
   });
 
   test('fetchWorkflowRuns finds only successful runs', async () => {
-    let runs = await fetchWorkflowRuns(interval, workflowId, PER_PAGE);
+    let { runs } = await fetchWorkflowRuns(interval, workflowId);
     expect(runs.length).toBe(8);
 
     for (let run of runs) {
@@ -43,7 +42,7 @@ describe('metrics: WorkflowDuration', () => {
     }
   });
 
-  test('fetchWorkflowRuns finds only runs in the interval', async () => {
+  test('fetchWorkflowRuns finds only runs in the interval, paginates if needed', async () => {
     // This shorter interval omits the first and last successful
     // workflow runs
     let shortInterval = Interval.fromDateTimes(
@@ -51,11 +50,21 @@ describe('metrics: WorkflowDuration', () => {
       DateTime.fromISO('2021-05-10T13:31:50Z').toUTC()
     );
 
-    let runs = await fetchWorkflowRuns(shortInterval, workflowId, PER_PAGE);
+    let { runs } = await fetchWorkflowRuns(shortInterval, workflowId);
     expect(runs.length).toBe(6);
 
     for (let run of runs) {
       expect(shortInterval.contains(run.createdAt)).toBe(true);
     }
+
+    let paginatedResults = await fetchWorkflowRuns(
+      shortInterval,
+      workflowId,
+      runs.length - 1
+    );
+    let { meta } = paginatedResults;
+
+    expect(meta.total_pages).toBeGreaterThan(1);
+    expect(paginatedResults.runs.length).toBe(runs.length);
   });
 });

@@ -29,11 +29,11 @@ export default class WorkflowDurationMetric implements Metric {
   }
 
   async run(): Promise<void> {
-    let workflowRuns = await fetchWorkflowRuns(this.interval, this.workflowId);
-    this.debug(`found ${workflowRuns.length} workflow runs`);
+    let { runs } = await fetchWorkflowRuns(this.interval, this.workflowId);
+    this.debug(`found ${runs.length} workflow runs`);
 
     let data: MetricData[] = [];
-    workflowRuns.forEach((run) => {
+    runs.forEach((run) => {
       this.debug(`run #${run.id} duration: ${durationToHuman(run.duration)}`);
       data.push({ value: run.duration.toMillis() });
     });

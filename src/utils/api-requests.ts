@@ -6,16 +6,24 @@ import debugBase from '../utils/debug';
 
 const MAX_PER_PAGE = 100;
 
+type WorkflowRunResults = {
+  runs: WorkflowRun[];
+  meta: {
+    per_page: number;
+    total_pages: number;
+  };
+};
+
 export async function fetchWorkflowRuns(
   interval: Interval,
   workflowId: number | string,
   per_page = MAX_PER_PAGE
-): Promise<WorkflowRun[]> {
+): Promise<WorkflowRunResults> {
   const debug = debugBase.extend('api:fetch-workflow-runs:' + workflowId);
   let { repo, owner, token } = githubArgs();
   let client = new Octokit({ auth: token });
 
-  let runs = [];
+  let runData = [];
   const status = 'success';
 
   let didLogCount = false;
@@ -55,7 +63,7 @@ export async function fetchWorkflowRuns(
         debug(
           `keeping run ${workflowRunData.id} because ${createdAt} is contained by the interval`
         );
-        runs.push(workflowRunData);
+        runData.push(workflowRunData);
       } else if (interval.isAfter(createdAt)) {
         debug(
           `exiting pagination: workflow run ${workflowRunData.id} found that was created at ${createdAt}, before the interval ${interval}`
@@ -73,5 +81,13 @@ export async function fetchWorkflowRuns(
     }
   }
 
-  return runs.map((data) => new WorkflowRun(data));
+  let runs = runData.map((data) => new WorkflowRun(data));
+
+  return {
+    runs,
+    meta: {
+      per_page,
+      total_pages: page,
+    },
+  };
 }
