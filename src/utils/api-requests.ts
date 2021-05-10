@@ -8,10 +8,7 @@ const MAX_PER_PAGE = 100;
 
 type WorkflowRunResults = {
   runs: WorkflowRun[];
-  meta: {
-    per_page: number;
-    total_pages: number;
-  };
+  meta: { total_pages: number };
 };
 
 export async function fetchWorkflowRuns(
@@ -61,12 +58,12 @@ export async function fetchWorkflowRuns(
         continue;
       } else if (interval.contains(createdAt)) {
         debug(
-          `keeping run ${workflowRunData.id} because ${createdAt} is contained by the interval`
+          `keeping run ${workflowRunData.id} because ${createdAt} is contained by ${interval}`
         );
         runData.push(workflowRunData);
       } else if (interval.isAfter(createdAt)) {
         debug(
-          `exiting pagination: workflow run ${workflowRunData.id} found that was created at ${createdAt}, before the interval ${interval}`
+          `exiting pagination: workflow run ${workflowRunData.id} created at ${createdAt}, before the interval ${interval}`
         );
         exitLoop = true;
         break;
@@ -85,9 +82,6 @@ export async function fetchWorkflowRuns(
 
   return {
     runs,
-    meta: {
-      per_page,
-      total_pages: page,
-    },
+    meta: { total_pages: page },
   };
 }

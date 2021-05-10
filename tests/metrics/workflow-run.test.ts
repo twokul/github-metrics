@@ -33,53 +33,62 @@ describe('metrics: WorkflowDuration', () => {
     expect(p100).toBe(511000);
   });
 
-  test('fetchWorkflowRuns finds only successful runs', async () => {
-    let { runs } = await fetchWorkflowRuns(interval, workflowId);
-    expect(runs.length).toBe(8);
+  describe('api-requests:fetchWorkflowRuns', () => {
+    test('finds only successful runs', async () => {
+      let { runs } = await fetchWorkflowRuns(interval, workflowId);
+      expect(runs.length).toBe(8);
 
-    for (let run of runs) {
-      expect(run.conclusion).toBe('success');
-    }
-  });
+      for (let run of runs) {
+        expect(run.conclusion).toBe('success');
+      }
+    });
 
-  test.only('fetchWorkflowRuns finds only runs in the interval, paginates if needed', async () => {
-    // This shorter interval omits the first and last successful
-    // workflow runs
-    let shortInterval = Interval.fromDateTimes(
-      DateTime.fromISO('2021-05-09T23:31:00Z'),
-      DateTime.fromISO('2021-05-10T13:31:50Z')
-    );
+    test('finds only runs in the interval, paginates if needed', async () => {
+      // This shorter interval omits the first and last successful
+      // workflow runs
+      let shortInterval = Interval.fromDateTimes(
+        DateTime.fromISO('2021-05-09T23:31:00Z'),
+        DateTime.fromISO('2021-05-10T13:31:50Z')
+      );
 
-    let results = await fetchWorkflowRuns(shortInterval, workflowId);
-    let { runs } = results;
-    expect(runs.length).toBe(6);
+      let results = await fetchWorkflowRuns(shortInterval, workflowId);
+      let { runs } = results;
+      expect(runs.length).toBe(6);
 
-    for (let run of runs) {
-      expect(shortInterval.contains(run.createdAt)).toBe(true);
-    }
+      for (let run of runs) {
+        expect(shortInterval.contains(run.createdAt)).toBe(true);
+      }
 
-    let paginatedResults = await fetchWorkflowRuns(
-      shortInterval,
-      workflowId,
-      runs.length - 1
-    );
-    let { meta } = paginatedResults;
+      let paginatedResults = await fetchWorkflowRuns(
+        shortInterval,
+        workflowId,
+        runs.length - 1
+      );
+      let { meta } = paginatedResults;
 
-    expect(meta.total_pages).toBeGreaterThan(results.meta.total_pages);
-    expect(paginatedResults.runs.length).toBe(runs.length);
-  });
+      expect(meta.total_pages).toBeGreaterThan(results.meta.total_pages);
+      expect(paginatedResults.runs.length).toBe(runs.length);
+    });
 
-  test('fetchWorkflowRuns exits pagination when it finds results before the interval', async () => {
-    let futureInterval = Interval.fromDateTimes(
-      DateTime.now().plus({ days: 1 }),
-      DateTime.now().plus({ days: 2 })
-    );
+    test('fetchWorkflowRuns exits pagination when it finds results before the interval', async () => {
+      let results = await fetchWorkflowRuns(interval, workflowId);
 
-    // when an interval is in the future, the first workflow run in its results
-    // will be before the interval, so we'll never request a second page
-    let { runs, meta } = await fetchWorkflowRuns(futureInterval, workflowId, 1);
+      let latestRun = results.runs[0];
 
-    expect(meta.total_pages).toBe(1);
-    expect(runs.length).toBe(0);
+      let soloRunInterval = Interval.fromDateTimes(
+        latestRun.createdAt.minus({ seconds: 1 }),
+        latestRun.createdAt.plus({ seconds: 1 })
+      );
+
+      let { runs, meta } = await fetchWorkflowRuns(
+        soloRunInterval,
+        workflowId,
+        1
+      );
+
+      expect(meta.total_pages).toBe(2);
+      expect(runs.length).toBe(1);
+      expect(runs[0].id).toBe(results.runs[0].id);
+    });
   });
 });
