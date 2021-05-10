@@ -1,19 +1,19 @@
 {
   "compilerOptions": {
-    "target": "ES2018",
-    "module": "commonjs",
-    "declaration": true,
-    "outDir": "dist",
     "composite": true,
+    "declaration": true,
+    "esModuleInterop": false,
+    "forceConsistentCasingInFileNames": true,
+    "module": "commonjs",
+    "noImplicitReturns": true,
+    "noUnusedLocals": true,
+    "outDir": "dist",
+    "rootDir": "src",
+    "skipLibCheck": false,
     "strict": true,
     "stripInternal": true,
-    "noUnusedLocals": true,
-    "noImplicitReturns": true,
-    "rootDir": "src",
-    "types": ["node"],
-    "esModuleInterop": false,
-    "skipLibCheck": false,
-    "forceConsistentCasingInFileNames": true
+    "target": "ES2018",
+    "types": ["node"]
   },
   "include": ["src/**/*.ts"]
 }

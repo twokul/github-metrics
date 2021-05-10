@@ -26,7 +26,7 @@ export async function fetchWorkflowRuns(
   let didLogCount = false;
   let page = 0;
 
-  for await (const response of client.paginate.iterator(
+  paginationLoop: for await (const response of client.paginate.iterator(
     client.rest.actions.listWorkflowRuns,
     {
       repo,
@@ -51,32 +51,24 @@ export async function fetchWorkflowRuns(
       `page #${page} ${response.data.length} items from ${first} -> ${last}`
     );
 
-    let exitLoop = false;
     for (let workflowRunData of response.data) {
       let createdAt = DateTime.fromISO(workflowRunData.created_at);
-      if (interval.isBefore(createdAt)) {
-        continue;
-      } else if (interval.contains(createdAt)) {
-        debug(
-          `keeping run ${workflowRunData.id} because ${createdAt} is contained by ${interval}`
-        );
-        runData.push(workflowRunData);
-      } else if (interval.isAfter(createdAt)) {
-        debug(
-          `exiting pagination: workflow run ${workflowRunData.id} created at ${createdAt}, before the interval ${interval}`
-        );
-        exitLoop = true;
-        break;
-      } else {
-        throw new Error(
-          `Unexpected workflowRunData not after, in or before interval: ${createdAt}, ${interval}`
-        );
+
+      switch (true) {
+        case interval.contains(createdAt):
+          debug(
+            `keeping run ${workflowRunData.id} because ${createdAt} is contained by ${interval}`
+          );
+          runData.push(workflowRunData);
+          break;
+        case interval.isAfter(createdAt):
+          debug(
+            `exiting pagination: workflow run ${workflowRunData.id} created at ${createdAt}, before the interval ${interval}`
+          );
+          break paginationLoop;
       }
     }
-    if (exitLoop) {
-      break;
-    }
-  }
+  } // end of paginationLoop
 
   let runs = runData.map((data) => new WorkflowRun(data));
 
