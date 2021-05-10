@@ -1,5 +1,5 @@
 import { Interval } from 'luxon';
-import { fetchWorkflowRuns } from '../utils/api-requests';
+import { fetchWorkflowRuns, WorkflowData } from '../utils/api-requests';
 import debug, { Debugger } from '../utils/debug';
 import { durationToHuman, millisToHuman } from '../utils/duration-to-human';
 import { Metric, MetricData, percentiles } from '../metric';
@@ -7,11 +7,18 @@ import { Metric, MetricData, percentiles } from '../metric';
 export default class WorkflowDurationMetric implements Metric {
   debug: Debugger;
   data: MetricData[];
-  name = 'Workflow Duration';
   didRun = false;
-  constructor(public interval: Interval, public workflowId: string | number) {
-    this.debug = debug.extend('metrics:workflow-duration:' + workflowId);
+  workflowId: number | string;
+  workflowName: string;
+  constructor(public interval: Interval, workflowData: WorkflowData) {
+    this.workflowId = workflowData.id;
+    this.workflowName = workflowData.name;
+    this.debug = debug.extend('metrics:workflow-duration:' + this.workflowId);
     this.data = [];
+  }
+
+  get name(): string {
+    return `Workflow Duration: ${this.workflowName}`;
   }
 
   get summary(): string {
@@ -23,9 +30,11 @@ export default class WorkflowDurationMetric implements Metric {
     }
 
     let [p0, p50, p90, p100] = percentiles([0, 50, 90, 100], this);
-    return `p0: ${millisToHuman(p0)}; p50: ${millisToHuman(
+    let pValues = `p0: ${millisToHuman(p0)}; p50: ${millisToHuman(
       p50
     )}; p90: ${millisToHuman(p90)}; p100: ${millisToHuman(p100)}`;
+
+    return [`Run count: ${this.data.length}`, pValues].join('\n');
   }
 
   async run(): Promise<void> {

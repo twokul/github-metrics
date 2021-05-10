@@ -11,8 +11,8 @@ type WorkflowRunResults = {
   meta: { total_pages: number };
 };
 
-type WorkflowData = {
-  id: number;
+export type WorkflowData = {
+  id: string | number;
   name: string;
 };
 
