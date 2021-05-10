@@ -2,7 +2,7 @@ import { Interval, DateTime } from 'luxon';
 import setupPolly from '../setup-polly';
 import {
   fetchWorkflowRuns,
-  fetchWorkflowIds,
+  fetchWorkflows,
 } from '../../src/utils/api-requests';
 
 describe('api-requests', () => {
@@ -15,11 +15,17 @@ describe('api-requests', () => {
     gh api /repos/bantic/github-metrics-tests/actions/workflows \
       | jq '.workflows[] | {id,name}'
    */
-  describe('fetchWorkflowIds', () => {
-    test('finds all workflow ids', async () => {
-      let ids = await fetchWorkflowIds();
+  describe('fetchWorkflows', () => {
+    test('finds all workflow ids and names', async () => {
+      let workflows = await fetchWorkflows();
+
+      expect(workflows.length).toBe(1);
+
+      let ids = workflows.map(({ id }) => id);
+      let names = workflows.map(({ name }) => name);
 
       expect(ids).toStrictEqual([8907563]);
+      expect(names).toStrictEqual(['Workflow Runs Create Test Data']);
     });
   });
 
