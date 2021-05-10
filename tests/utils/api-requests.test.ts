@@ -1,39 +1,43 @@
 import { Interval, DateTime } from 'luxon';
 import setupPolly from '../setup-polly';
-import WorkflowDuration from '../../src/metrics/workflow-duration';
-import { fetchWorkflowRuns } from '../../src/utils/api-requests';
-import { percentiles } from '../../src/metric';
+import {
+  fetchWorkflowRuns,
+  fetchWorkflowIds,
+} from '../../src/utils/api-requests';
 
-/**
- *  These tests rely on the source-of-run-data.yml Workflow Runs:
- *  https://github.com/bantic/github-metrics-tests/actions/workflows/source-of-run-data.yml
- * 
- *  To view the source data locally, install `gh` and `jq` and run:
-    gh api -X GET /repos/bantic/github-metrics-tests/actions/workflows/source-of-run-data.yml/runs \
-      -f 'status=success' | jq '.workflow_runs[] | {id, created_at, updated_at}'
- */
-
-describe('metrics: WorkflowDuration', () => {
+describe('api-requests', () => {
   setupPolly();
 
-  const workflowId = 'source-of-run-data.yml';
-  const start = DateTime.fromISO('2021-05-09T22:30:00Z');
-  const end = DateTime.fromISO('2021-05-10T13:40:00Z');
-  const interval = Interval.fromDateTimes(start, end);
+  /**
+   * Source data from https://github.com/bantic/github-metrics-tests/actions
+   * View source data locally using `gh` and `jq`:
 
-  test('fetches workflow run durations', async () => {
-    let metric = new WorkflowDuration(interval, workflowId);
-    await metric.run();
-    expect(metric.data.length).toBe(8);
+    gh api /repos/bantic/github-metrics-tests/actions/workflows \
+      | jq '.workflows[] | {id,name}'
+   */
+  describe('fetchWorkflowIds', () => {
+    test('finds all workflow ids', async () => {
+      let ids = await fetchWorkflowIds();
 
-    let [p0, p50, p90, p100] = percentiles([0, 50, 90, 100], metric);
-    expect(p0).toBe(16000);
-    expect(p50).toBe(61000);
-    expect(p90).toBe(511000);
-    expect(p100).toBe(511000);
+      expect(ids).toStrictEqual([8907563]);
+    });
   });
 
-  describe('api-requests:fetchWorkflowRuns', () => {
+  /**
+   *  These tests rely on the source-of-run-data.yml Workflow Runs:
+   *  https://github.com/bantic/github-metrics-tests/actions/workflows/source-of-run-data.yml
+   * 
+   *  To view the source data locally, install `gh` and `jq` and run:
+      gh api -X GET /repos/bantic/github-metrics-tests/actions/workflows/source-of-run-data.yml/runs \
+        -f 'status=success' | jq '.workflow_runs[] | {id, created_at, updated_at}'
+   */
+
+  describe('fetchWorkflowRuns', () => {
+    const workflowId = 'source-of-run-data.yml';
+    const start = DateTime.fromISO('2021-05-09T22:30:00Z');
+    const end = DateTime.fromISO('2021-05-10T13:40:00Z');
+    const interval = Interval.fromDateTimes(start, end);
+
     test('finds only successful runs', async () => {
       let { runs } = await fetchWorkflowRuns(interval, workflowId);
       expect(runs.length).toBe(8);
