@@ -1,6 +1,5 @@
 import * as path from 'path';
 
-// @ts-ignore
 import replaceAll from 'string.prototype.replaceall';
 
 // @ts-ignore

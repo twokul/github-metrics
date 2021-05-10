@@ -8,7 +8,10 @@
   ],
   "compilerOptions": {
     "types": ["jest"],
-    "rootDir": ".."
+    "rootDir": "..",
+    "paths": {
+      "string.prototype.replaceall": ["../types/string.prototype.replaceall"]
+    }
   },
   "include": ["."]
 }
