@@ -23,7 +23,7 @@ export function durationToHuman(duration: Duration): string {
   let hours = duration.get('hours');
   let seconds = duration.get('seconds');
 
-  let parts = [];
+  let parts: string[] = [];
 
   if (days > 0) {
     parts.push(`${days} ${pluralize('day', days)}`);
