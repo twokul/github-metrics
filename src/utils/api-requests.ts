@@ -56,7 +56,7 @@ export async function fetchWorkflowRuns(
 
     let exitLoop = false;
     for (let workflowRunData of response.data) {
-      let createdAt = DateTime.fromISO(workflowRunData.created_at).toUTC();
+      let createdAt = DateTime.fromISO(workflowRunData.created_at);
       if (interval.isBefore(createdAt)) {
         continue;
       } else if (interval.contains(createdAt)) {
