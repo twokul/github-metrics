@@ -15,6 +15,30 @@ type HeaderDefaults = {
   [key: string]: string;
 };
 
+type HAR = {
+  log: {
+    entries: Array<{
+      request: {
+        headers: Header[];
+      };
+      response: {
+        headers: Header[];
+      };
+      startedDateTime: string;
+      time: number;
+      timings: {
+        blocked: number;
+        connect: number;
+        dns: number;
+        receive: number;
+        send: number;
+        ssl: number;
+        wait: number;
+      };
+    }>;
+  };
+};
+
 function normalizeHeaders(
   headers: Header[],
   defaults: HeaderDefaults
@@ -46,24 +70,34 @@ function normalizeResponseHeaders(headers: Header[]): Header[] {
   return normalizeHeaders(headers, defaults);
 }
 
+function normalizeHAR(har: HAR): HAR {
+  let entries = har.log.entries;
+  for (let entry of entries) {
+    // Note: changing the contents of the headers may cause them to
+    // be out of sync with the `headersSize` property that PollyJS
+    // also sets on each entry, but that property is unused in the request-matching, so
+    // it seems ok to let it vary.
+    entry.request.headers = normalizeRequestHeaders(entry.request.headers);
+    entry.response.headers = normalizeResponseHeaders(entry.response.headers);
+    entry.startedDateTime = '2021-05-10T00:00:00.000Z';
+    entry.time = 150;
+    entry.timings = {
+      blocked: -1,
+      connect: -1,
+      dns: -1,
+      receive: 0,
+      send: 0,
+      ssl: -1,
+      wait: 150,
+    };
+  }
+
+  return har;
+}
+
 class TokenStrippingPersister extends FSPersister {
-  stringify(har: any) {
-    let entries = har.log.entries;
-    for (let entry of entries) {
-      entry.request.headers = normalizeRequestHeaders(entry.request.headers);
-      entry.response.headers = normalizeResponseHeaders(entry.response.headers);
-      entry.startedDateTime = '2021-05-10T00:00:00.000Z';
-      entry.time = 150;
-      entry.timings = {
-        blocked: -1,
-        connect: -1,
-        dns: -1,
-        receive: 0,
-        send: 0,
-        ssl: -1,
-        wait: 150,
-      };
-    }
+  stringify(har: HAR) {
+    har = normalizeHAR(har);
     return super.stringify(har);
   }
 }
