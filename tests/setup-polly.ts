@@ -39,8 +39,8 @@ function normalizeResponseHeaders(headers: Header[]): Header[] {
     'x-ratelimit-limit': '5000',
     'x-ratelimit-used': '0',
     'x-ratelimit-remaining': '5000',
-    'x-ratelimit-reset': '1620677342',
-    date: 'Mon, 10 May 2021 19:12:14 GMT',
+    'x-ratelimit-reset': '1630000000',
+    date: 'Mon, 10 May 2021 00:00:00 GMT',
     'x-github-request-id': 'D403:6EA6:6FD290:1B2A629:60997471',
   };
   return normalizeHeaders(headers, defaults);
@@ -52,7 +52,7 @@ class TokenStrippingPersister extends FSPersister {
     for (let entry of entries) {
       entry.request.headers = normalizeRequestHeaders(entry.request.headers);
       entry.response.headers = normalizeResponseHeaders(entry.response.headers);
-      entry.startedDateTime = '2021-05-10T17:59:14.813Z';
+      entry.startedDateTime = '2021-05-10T00:00:00.000Z';
       entry.time = 150;
       entry.timings = {
         blocked: -1,
