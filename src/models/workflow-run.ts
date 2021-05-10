@@ -1,12 +1,6 @@
 import { DateTime, Duration } from 'luxon';
 import debug, { Debugger } from '../utils/debug';
 
-// export async function loadWorkflowRun(number: number): Promise<WorkflowRun> {
-// let graphql = githubGraphqlClient();
-// let data: any = await graphql(singlePullRequest(number));
-// return new PullRequest(data.repository.pullRequest as GraphQLPRData);
-// }
-
 export interface WorkflowRunData {
   id: number;
   status: string;
