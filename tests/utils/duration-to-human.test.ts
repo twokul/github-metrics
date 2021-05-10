@@ -1,4 +1,4 @@
-import durationToHuman from '../../src/utils/duration-to-human';
+import { durationToHuman } from '../../src/utils/duration-to-human';
 import { Duration } from 'luxon';
 
 function toDuration(obj: any) {
@@ -24,7 +24,7 @@ describe('utils:durationToHuman', () => {
       durationToHuman(
         toDuration({ days: 0, hours: 0, minutes: 10, seconds: 25 })
       )
-    ).toBe('10 minutes');
+    ).toBe('10 minutes 25 seconds');
 
     expect(
       durationToHuman(

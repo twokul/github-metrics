@@ -2,7 +2,7 @@ import { Duration, Interval } from 'luxon';
 import { fetchMergedPullRequestNumbers } from '../utils/graphql-queries';
 import { loadPullRequest } from '../models/pull-request';
 import debug, { Debugger } from '../utils/debug';
-import durationToHuman from '../utils/duration-to-human';
+import { millisToHuman } from '../utils/duration-to-human';
 import { Metric, MetricData, percentiles } from '../metric';
 
 export default class TimeToMergeMetric implements Metric {
@@ -21,14 +21,10 @@ export default class TimeToMergeMetric implements Metric {
     }
 
     let [p0, p50, p90, p100] = percentiles([0, 50, 90, 100], this);
-    let toFormatted = (pValue: number): string => {
-      let duration = Duration.fromMillis(pValue);
-      return durationToHuman(duration);
-    };
 
-    return `p0: ${toFormatted(p0)}; p50: ${toFormatted(
+    return `p0: ${millisToHuman(p0)}; p50: ${millisToHuman(
       p50
-    )}; p90: ${toFormatted(p90)}; p100: ${toFormatted(p100)}`;
+    )}; p90: ${millisToHuman(p90)}; p100: ${millisToHuman(p100)}`;
   }
 
   async run(): Promise<void> {

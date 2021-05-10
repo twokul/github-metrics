@@ -49,6 +49,25 @@ To add a new test that uses live data:
 
 At this point you can unset the `RECORD_REQUESTS` and iterate locally using the recording. Or follow the steps above to regenerate it if needed.
 
+### Debugging
+
+You can run individual scripts using `ts-node`. In order to use them with breakpoints, run the script like this:
+
+```
+node --inspect-brk -r ts-node/register src/path/to/ts-file.ts
+```
+
+And then open the chrome devtools at: `chrome://inspect`.
+
+This [article](https://medium.com/@paul_irish/debugging-node-js-nightlies-with-chrome-devtools-7c4a1b95ae27) has some more details.
+
+You can run a test with the debugger in a similar manner. For instance, to run the metrics
+tests using the chrome inspector for debugging, run:
+
+```
+node --inspect-brk node_modules/.bin/jest --runInBand tests/metrics
+```
+
 ## Documentation
 
 To build a new version of the docs, run `yarn build-with-docs`.

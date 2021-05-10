@@ -1,26 +1,18 @@
 import * as path from 'path';
 
 // @ts-ignore
-import { setupPolly } from 'setup-polly-jest';
+import replaceAll from 'string.prototype.replaceall';
 
-let x: number[][] = [[0]];
+// @ts-ignore
+import { setupPolly } from 'setup-polly-jest';
 
 // @ts-ignore
 import FSPersister from '@pollyjs/persister-fs';
 
-function replaceAll(string: string, search: string, replace: string): string {
-  while (string.includes(search)) {
-    string = string.replace(search, replace);
-  }
-  return string;
-}
-
 class TokenStrippingPersister extends FSPersister {
   stringify(...args: any[]) {
     let string = super.stringify(...args);
-    let tokenRe = /"token .*?"/;
-    let match = string.match(tokenRe);
-    string = replaceAll(string, match[0], '"token *****"');
+    string = replaceAll(string, /"token .*?"/g, '"token *****"');
     return string;
   }
 }
