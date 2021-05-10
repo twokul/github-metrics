@@ -69,6 +69,11 @@ export async function fetchWorkflowRuns(
     }
     page++;
 
+    if (response.data.length === 0) {
+      debug(`exiting pagination because of a 0-length response`);
+      break paginationLoop;
+    }
+
     let first = DateTime.fromISO(response.data[0].created_at).toUTC();
     let last = DateTime.fromISO(
       response.data[response.data.length - 1].created_at
