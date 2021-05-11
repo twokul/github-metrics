@@ -60,8 +60,6 @@ function normalizeHAR(har: Har): Har {
       entry.response.headers,
       NORMALIZED_DEFAULTS.responseHeaders
     );
-    // @ts-ignore This is a custom extension to the Har spec that Polly sets,
-    // but it isn't used for anything as far as I can tell.
     entry.request.headersSize = NORMALIZED_DEFAULTS.headersSize;
     entry.response.headersSize = NORMALIZED_DEFAULTS.headersSize;
     entry.startedDateTime = NORMALIZED_DEFAULTS.entry.startedDateTime;
