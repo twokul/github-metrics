@@ -67,12 +67,6 @@ class RepositoryReport {
         return __classPrivateFieldGet(this, _pullRequests).filter((pr) => pr.state === github_client_1.PullRequestState.CLOSED);
     }
     /**
-     * The number of merged pull requests.
-     */
-    get mergedPullRequests() {
-        return __classPrivateFieldGet(this, _pullRequests).filter((pr) => pr.state === github_client_1.PullRequestState.MERGED);
-    }
-    /**
      * The number of opened and merged pull requests.
      */
     get mergedAndOpened() {
@@ -85,24 +79,6 @@ class RepositoryReport {
         const hotfixes = __classPrivateFieldGet(this, _pullRequests).map((pr) => new pull_request_1.default(pr))
             .filter((pr) => pr.isHotfix);
         return hotfixes.length;
-    }
-    /**
-     * Calculates the average time to merge for the merged pull requests.
-     *
-     * Time to merge is the amount of time elapsed from "pull request created" to
-     * "pull request merged".
-     */
-    get averageTimeToMerge() {
-        if (__classPrivateFieldGet(this, _pullRequests).length === 0) {
-            return 0;
-        }
-        const totalTimeToMerge = this.mergedPullRequests
-            .map((pullRequest) => {
-            const analysis = new pull_request_1.default(pullRequest);
-            return Number(analysis.timeToMerge.toFormat('h'));
-        })
-            .reduce((sum, value) => (sum += value), 0);
-        return totalTimeToMerge / this.mergedPullRequests.length;
     }
     /**
      * Calculates the average review depth for all pull requests.

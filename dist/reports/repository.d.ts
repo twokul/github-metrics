@@ -35,10 +35,6 @@ export default class RepositoryReport {
      */
     get closedPullRequests(): Array<PullRequest>;
     /**
-     * The number of merged pull requests.
-     */
-    get mergedPullRequests(): Array<PullRequest>;
-    /**
      * The number of opened and merged pull requests.
      */
     get mergedAndOpened(): Array<PullRequest>;
@@ -46,13 +42,6 @@ export default class RepositoryReport {
      * The number of pull requests against `release/*` branch.
      */
     get hotfixes(): number;
-    /**
-     * Calculates the average time to merge for the merged pull requests.
-     *
-     * Time to merge is the amount of time elapsed from "pull request created" to
-     * "pull request merged".
-     */
-    get averageTimeToMerge(): number;
     /**
      * Calculates the average review depth for all pull requests.
      *

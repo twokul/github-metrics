@@ -22,36 +22,33 @@ class GithubMetrics {
         _githubClient.set(this, void 0);
         __classPrivateFieldSet(this, _githubClient, new github_client_1.default({ token }));
     }
-    async generateDailyReport({ owner, repo, }) {
-        const { startDate, endDate } = date_1.generateDateRange();
+    async generateReport({ owner, repo, interval, }) {
         const pullRequests = await __classPrivateFieldGet(this, _githubClient).getPullRequestsByPeriod({
             owner,
             repo,
-            startDate: startDate.toString(),
-            endDate: endDate.toString(),
+            startDate: interval.start.toString(),
+            endDate: interval.end.toString(),
         });
         return new repository_1.default({
             pullRequests,
             owner,
             repo,
-            startDate: startDate.toISODate(),
-            endDate: endDate.toISODate(),
+            startDate: interval.start.toISODate(),
+            endDate: interval.end.toISODate(),
+        });
+    }
+    async generateDailyReport({ owner, repo, }) {
+        return this.generateReport({
+            owner,
+            repo,
+            interval: date_1.getInterval(date_1.Period.DAY),
         });
     }
     async generateWeeklyReport({ owner, repo, }) {
-        const { startDate, endDate } = date_1.generateDateRange(date_1.Period.WEEK);
-        const pullRequests = await __classPrivateFieldGet(this, _githubClient).getPullRequestsByPeriod({
+        return this.generateReport({
             owner,
             repo,
-            startDate: startDate.toString(),
-            endDate: endDate.toString(),
-        });
-        return new repository_1.default({
-            pullRequests,
-            owner,
-            repo,
-            startDate: startDate.toISODate(),
-            endDate: endDate.toISODate(),
+            interval: date_1.getInterval(date_1.Period.WEEK),
         });
     }
 }
