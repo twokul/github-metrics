@@ -15,13 +15,16 @@ import { percentiles } from '../../src/metric';
 describe('metrics: WorkflowDuration', () => {
   setupPolly();
 
-  const workflowId = 'source-of-run-data.yml';
+  const workflow = {
+    id: 'source-of-run-data.yml',
+    name: 'name does not matter to this test',
+  };
   const start = DateTime.fromISO('2021-05-09T22:30:00Z');
   const end = DateTime.fromISO('2021-05-10T13:40:00Z');
   const interval = Interval.fromDateTimes(start, end);
 
   test('fetches workflow run durations', async () => {
-    let metric = new WorkflowDuration(interval, workflowId);
+    let metric = new WorkflowDuration(interval, workflow);
     await metric.run();
     expect(metric.data.length).toBe(8);
 

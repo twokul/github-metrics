@@ -6,6 +6,8 @@ import TimeToMergeMetric from './metrics/time-to-merge';
 import MergedPRsMetric from './metrics/merged-prs';
 import { setGithubArgs } from './utils/env';
 import { getInterval, Period } from './utils/date';
+import { fetchWorkflows } from './utils/api-requests';
+import WorkflowDurationMetric from './metrics/workflow-duration';
 
 /**
  * The function that runs the following workflow:
@@ -50,6 +52,14 @@ export async function run({
     const mergedPRs = new MergedPRsMetric(weekEndingNow);
     await mergedPRs.run();
 
+    const workflows = await fetchWorkflows();
+    let workflowDurationMetrics = [];
+    for (let workflow of workflows) {
+      let metric = new WorkflowDurationMetric(weekEndingNow, workflow);
+      await metric.run();
+      workflowDurationMetrics.push(metric);
+    }
+
     const message = constructSlackMessage({
       header: `Weekly Metrics for ${weeklyReport.name} (${weeklyReport.startDate} - ${weeklyReport.endDate}) 📈`,
       footer:
@@ -70,6 +80,13 @@ export async function run({
         {
           text: [timeToMerge.name, timeToMerge.summary].join('\n'),
         },
+        ...workflowDurationMetrics
+          .filter((metric) => metric.data.length > 0)
+          .map((metric) => {
+            return {
+              text: [metric.name, metric.summary].join('\n'),
+            };
+          }),
         {
           text: `Average Pull Request Idle Time: *${
             weeklyReport.averageIdleTime

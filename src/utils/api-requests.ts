@@ -11,8 +11,8 @@ type WorkflowRunResults = {
   meta: { total_pages: number };
 };
 
-type WorkflowData = {
-  id: number;
+export type WorkflowData = {
+  id: string | number;
   name: string;
 };
 
@@ -51,6 +51,7 @@ export async function fetchWorkflowRuns(
   const status = 'success';
 
   let didLogCount = false;
+  let didLogFirstFound = false;
   let page = 0;
 
   paginationLoop: for await (const response of client.paginate.iterator(
@@ -69,6 +70,11 @@ export async function fetchWorkflowRuns(
     }
     page++;
 
+    if (response.data.length === 0) {
+      debug(`exiting pagination because of a 0-length response`);
+      break paginationLoop;
+    }
+
     let first = DateTime.fromISO(response.data[0].created_at).toUTC();
     let last = DateTime.fromISO(
       response.data[response.data.length - 1].created_at
@@ -83,9 +89,12 @@ export async function fetchWorkflowRuns(
 
       switch (true) {
         case interval.contains(createdAt):
-          debug(
-            `keeping run ${workflowRunData.id} because ${createdAt} is contained by ${interval}`
-          );
+          if (!didLogFirstFound) {
+            debug(
+              `found first run in interval, keeping ${workflowRunData.id} because ${createdAt} is contained by ${interval}`
+            );
+            didLogFirstFound = true;
+          }
           runData.push(workflowRunData);
           break;
         case interval.isAfter(createdAt):

@@ -68,6 +68,11 @@ tests using the chrome inspector for debugging, run:
 node --inspect-brk node_modules/.bin/jest --runInBand tests/metrics
 ```
 
+### Use DEBUG=github-metrics:\*
+
+The codebase uses the [debug package](https://github.com/visionmedia/debug#readme) to log debugging info.
+Set the env var `DEBUG` to view logs. To see all of them, use `DEBUG=github-metrics:*`. See debug's docs for more.
+
 ## Documentation
 
 To build a new version of the docs, run `yarn build-with-docs`.
