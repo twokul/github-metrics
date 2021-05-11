@@ -51,6 +51,7 @@ export async function fetchWorkflowRuns(
   const status = 'success';
 
   let didLogCount = false;
+  let didLogFirstFound = false;
   let page = 0;
 
   paginationLoop: for await (const response of client.paginate.iterator(
@@ -88,9 +89,12 @@ export async function fetchWorkflowRuns(
 
       switch (true) {
         case interval.contains(createdAt):
-          debug(
-            `keeping run ${workflowRunData.id} because ${createdAt} is contained by ${interval}`
-          );
+          if (!didLogFirstFound) {
+            debug(
+              `found first run in interval, keeping ${workflowRunData.id} because ${createdAt} is contained by ${interval}`
+            );
+            didLogFirstFound = true;
+          }
           runData.push(workflowRunData);
           break;
         case interval.isAfter(createdAt):
