@@ -11,25 +11,31 @@ type WorkflowRunResults = {
   meta: { total_pages: number };
 };
 
-export async function fetchWorkflowIds(): Promise<number[]> {
+type WorkflowData = {
+  id: number;
+  name: string;
+};
+
+export async function fetchWorkflows(): Promise<WorkflowData[]> {
   const debug = debugBase.extend('api:fetch-workflows');
   let { repo, owner, token } = githubArgs();
   let client = new Octokit({ auth: token });
   let result = await client.actions.listRepoWorkflows({ repo, owner });
 
-  let workflowIds = result.data.workflows.map(({ id }) => id);
-  debug(
-    `Found ${result.data.workflows.length} workflows: ${workflowIds.join(',')}`
-  );
+  let workflowData = result.data.workflows.map(({ id, name }) => ({
+    id,
+    name,
+  }));
+  debug(`Found ${result.data.workflows.length} workflows: %o`, workflowData);
 
   let total = result.data.total_count;
-  if (total > workflowIds.length) {
+  if (total > workflowData.length) {
     console.warn(
-      `Warning: not all workflows were found. Only found ${workflowIds.length} out of ${total}`
+      `Warning: not all workflows were found. Only found ${workflowData.length} out of ${total}`
     );
   }
 
-  return workflowIds;
+  return workflowData;
 }
 
 export async function fetchWorkflowRuns(
