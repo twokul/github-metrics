@@ -5,9 +5,7 @@ import { setupPolly } from 'setup-polly-jest';
 import FSPersister from '@pollyjs/persister-fs';
 import { Har, Header } from 'har-format';
 
-type HeaderDefaults = {
-  [key: string]: string;
-};
+type HeaderDefaults = Record<string, string>;
 
 const NORMALIZED_DEFAULTS = {
   requestHeaders: {
