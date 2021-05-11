@@ -30,6 +30,7 @@
     "@pollyjs/persister-fs": "^5.0.0",
     "@types/debug": "^4.1.5",
     "@types/fetch-mock": "^7.3.3",
+    "@types/har-format": "^1.2.5",
     "@types/jest": "^26.0.20",
     "@types/luxon": "^1.26.2",
     "@types/node": "^15.0.1",
