@@ -34,7 +34,7 @@ export default class WorkflowDurationMetric implements Metric {
       p50
     )}; p90: ${millisToHuman(p90)}; p100: ${millisToHuman(p100)}`;
 
-    return [`Run count: ${this.data.length}`, pValues].join('\n');
+    return [`Successful run count: ${this.data.length}`, pValues].join('\n');
   }
 
   async run(): Promise<void> {
