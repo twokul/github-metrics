@@ -8,7 +8,7 @@ import { setGithubArgs } from './utils/env';
 import { getInterval, Period } from './utils/date';
 import { fetchWorkflows } from './utils/api-requests';
 import WorkflowDurationMetric from './metrics/workflow-duration';
-import debug from './utils/debug';
+import debug, { enableDebugging } from './utils/debug';
 
 /**
  * The function that runs the following workflow:
@@ -37,7 +37,8 @@ export async function run({
   setGithubArgs(githubOwner, githubRepo, githubToken);
 
   if (logDebugMessages) {
-    process.env.DEBUG = 'github-metrics:*';
+    console.log('enabling debugging');
+    enableDebugging();
     debug.log = (...args) => console.log(...args);
   }
 

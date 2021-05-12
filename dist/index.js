@@ -843,8 +843,13 @@ exports.getInterval = getInterval;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.enableDebugging = void 0;
 const debug_1 = __nccwpck_require__(7239);
 const debug = debug_1.default('github-metrics');
+function enableDebugging() {
+    debug_1.default.enable('github-metrics:*');
+}
+exports.enableDebugging = enableDebugging;
 exports.default = debug;
 
 
@@ -21943,7 +21948,8 @@ const debug_1 = __nccwpck_require__(4601);
 async function run({ githubOwner, githubRepo, githubToken, slackAppToken, slackChannelId, logDebugMessages, }) {
     env_1.setGithubArgs(githubOwner, githubRepo, githubToken);
     if (logDebugMessages) {
-        process.env.DEBUG = 'github-metrics:*';
+        console.log('enabling debugging');
+        debug_1.enableDebugging();
         debug_1.default.log = (...args) => console.log(...args);
     }
     try {
