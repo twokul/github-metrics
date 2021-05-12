@@ -36,10 +36,9 @@ export async function run({
 }): Promise<void> {
   setGithubArgs(githubOwner, githubRepo, githubToken);
 
-  console.log('STARTING');
   if (logDebugMessages) {
     process.env.DEBUG = 'github-metrics:*';
-    debug.log = (message) => core.info(message);
+    debug.log = (...args) => console.log(...args);
   }
 
   try {

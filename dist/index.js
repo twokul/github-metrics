@@ -21942,10 +21942,9 @@ const debug_1 = __nccwpck_require__(4601);
  */
 async function run({ githubOwner, githubRepo, githubToken, slackAppToken, slackChannelId, logDebugMessages, }) {
     env_1.setGithubArgs(githubOwner, githubRepo, githubToken);
-    console.log('STARTING');
     if (logDebugMessages) {
         process.env.DEBUG = 'github-metrics:*';
-        debug_1.default.log = (message) => core.info(message);
+        debug_1.default.log = (...args) => console.log(...args);
     }
     try {
         const slack = new web_api_1.WebClient(slackAppToken);
