@@ -23,3 +23,7 @@ inputs:
   slack-channel-id:
     required: true
     description: 'Slack Channel Id'
+  log-debug-messages:
+    required: false
+    default: false
+    description: Show all debug logs
