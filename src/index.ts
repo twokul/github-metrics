@@ -37,8 +37,7 @@ export async function run({
   setGithubArgs(githubOwner, githubRepo, githubToken);
 
   if (logDebugMessages) {
-    // @ts-ignore
-    debug.enable('github-metrics:*');
+    process.env.DEBUG = 'github-metrics:*';
     debug.log = (message) => core.info(message);
   }
 
