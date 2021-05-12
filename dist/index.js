@@ -351,7 +351,7 @@ class WorkflowDurationMetric {
         }
         let [p0, p50, p90, p100] = metric_1.percentiles([0, 50, 90, 100], this);
         let pValues = `p0: ${duration_to_human_1.millisToHuman(p0)}; p50: ${duration_to_human_1.millisToHuman(p50)}; p90: ${duration_to_human_1.millisToHuman(p90)}; p100: ${duration_to_human_1.millisToHuman(p100)}`;
-        return [`Run count: ${this.data.length}`, pValues].join('\n');
+        return [`Successful run count: ${this.data.length}`, pValues].join('\n');
     }
     async run() {
         let { runs } = await api_requests_1.fetchWorkflowRuns(this.interval, this.workflowId);
@@ -843,8 +843,13 @@ exports.getInterval = getInterval;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.enableDebugging = void 0;
 const debug_1 = __nccwpck_require__(7239);
 const debug = debug_1.default('github-metrics');
+function enableDebugging() {
+    debug_1.default.enable('github-metrics:*');
+}
+exports.enableDebugging = enableDebugging;
 exports.default = debug;
 
 
@@ -21930,6 +21935,7 @@ const env_1 = __nccwpck_require__(804);
 const date_1 = __nccwpck_require__(6898);
 const api_requests_1 = __nccwpck_require__(3989);
 const workflow_duration_1 = __nccwpck_require__(5443);
+const debug_1 = __nccwpck_require__(4601);
 /**
  * The function that runs the following workflow:
  *
@@ -21939,8 +21945,12 @@ const workflow_duration_1 = __nccwpck_require__(5443);
  *
  * @public
  */
-async function run({ githubOwner, githubRepo, githubToken, slackAppToken, slackChannelId, }) {
+async function run({ githubOwner, githubRepo, githubToken, slackAppToken, slackChannelId, logDebugMessages, }) {
     env_1.setGithubArgs(githubOwner, githubRepo, githubToken);
+    if (logDebugMessages == 'true') {
+        debug_1.enableDebugging();
+        debug_1.default.log = (...args) => console.log(...args);
+    }
     try {
         const slack = new web_api_1.WebClient(slackAppToken);
         const githubMetrics = new github_metrics_1.default({
@@ -22016,12 +22026,14 @@ const githubRepo = process.env.GITHUB_REPO || core.getInput('github-repo');
 const githubToken = process.env.GITHUB_TOKEN || core.getInput('github-token');
 const slackChannelId = process.env.SLACK_CHANNEL_ID || core.getInput('slack-channel-id');
 const slackAppToken = process.env.SLACK_APP_TOKEN || core.getInput('slack-app-token');
+const logDebugMessages = process.env.LOG_DEBUG_MESSAGES || core.getInput('log-debug-messages');
 run({
     githubOwner,
     githubRepo,
     githubToken,
     slackAppToken,
     slackChannelId,
+    logDebugMessages,
 });
 
 })();
