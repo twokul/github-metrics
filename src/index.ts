@@ -8,6 +8,7 @@ import { setGithubArgs } from './utils/env';
 import { getInterval, Period } from './utils/date';
 import { fetchWorkflows } from './utils/api-requests';
 import WorkflowDurationMetric from './metrics/workflow-duration';
+import debug from './utils/debug';
 
 /**
  * The function that runs the following workflow:
@@ -24,14 +25,22 @@ export async function run({
   githubToken,
   slackAppToken,
   slackChannelId,
+  logDebugMessages,
 }: {
   githubOwner: string;
   githubRepo: string;
   githubToken: string;
   slackAppToken: string;
   slackChannelId: string;
+  logDebugMessages: string;
 }): Promise<void> {
   setGithubArgs(githubOwner, githubRepo, githubToken);
+
+  if (logDebugMessages) {
+    // @ts-ignore
+    debug.enable('github-metrics:*');
+    debug.log = (message) => core.info(message);
+  }
 
   try {
     const slack = new WebClient(slackAppToken);
@@ -120,6 +129,8 @@ const slackChannelId =
   process.env.SLACK_CHANNEL_ID || core.getInput('slack-channel-id');
 const slackAppToken =
   process.env.SLACK_APP_TOKEN || core.getInput('slack-app-token');
+const logDebugMessages =
+  process.env.LOG_DEBUG_MESSAGES || core.getInput('log-debug-messages');
 
 run({
   githubOwner,
@@ -127,4 +138,5 @@ run({
   githubToken,
   slackAppToken,
   slackChannelId,
+  logDebugMessages,
 });

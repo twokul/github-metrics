@@ -21930,6 +21930,7 @@ const env_1 = __nccwpck_require__(804);
 const date_1 = __nccwpck_require__(6898);
 const api_requests_1 = __nccwpck_require__(3989);
 const workflow_duration_1 = __nccwpck_require__(5443);
+const debug_1 = __nccwpck_require__(4601);
 /**
  * The function that runs the following workflow:
  *
@@ -21939,8 +21940,13 @@ const workflow_duration_1 = __nccwpck_require__(5443);
  *
  * @public
  */
-async function run({ githubOwner, githubRepo, githubToken, slackAppToken, slackChannelId, }) {
+async function run({ githubOwner, githubRepo, githubToken, slackAppToken, slackChannelId, logDebugMessages, }) {
     env_1.setGithubArgs(githubOwner, githubRepo, githubToken);
+    if (logDebugMessages) {
+        // @ts-ignore
+        debug_1.default.enable('github-metrics:*');
+        debug_1.default.log = (message) => core.info(message);
+    }
     try {
         const slack = new web_api_1.WebClient(slackAppToken);
         const githubMetrics = new github_metrics_1.default({
@@ -22016,12 +22022,14 @@ const githubRepo = process.env.GITHUB_REPO || core.getInput('github-repo');
 const githubToken = process.env.GITHUB_TOKEN || core.getInput('github-token');
 const slackChannelId = process.env.SLACK_CHANNEL_ID || core.getInput('slack-channel-id');
 const slackAppToken = process.env.SLACK_APP_TOKEN || core.getInput('slack-app-token');
+const logDebugMessages = process.env.LOG_DEBUG_MESSAGES || core.getInput('log-debug-messages');
 run({
     githubOwner,
     githubRepo,
     githubToken,
     slackAppToken,
     slackChannelId,
+    logDebugMessages,
 });
 
 })();

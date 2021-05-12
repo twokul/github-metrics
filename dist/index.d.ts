@@ -7,10 +7,11 @@
  *
  * @public
  */
-export declare function run({ githubOwner, githubRepo, githubToken, slackAppToken, slackChannelId, }: {
+export declare function run({ githubOwner, githubRepo, githubToken, slackAppToken, slackChannelId, logDebugMessages, }: {
     githubOwner: string;
     githubRepo: string;
     githubToken: string;
     slackAppToken: string;
     slackChannelId: string;
+    logDebugMessages: string;
 }): Promise<void>;

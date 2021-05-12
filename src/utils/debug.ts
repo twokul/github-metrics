@@ -1,6 +1,6 @@
 import debugBase, { Debugger } from 'debug';
 
-export { Debugger } from 'debug';
+const debug = debugBase('github-metrics');
 
-const debug: Debugger = debugBase('github-metrics');
+export { Debugger };
 export default debug;
