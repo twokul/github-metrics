@@ -21947,8 +21947,7 @@ const debug_1 = __nccwpck_require__(4601);
  */
 async function run({ githubOwner, githubRepo, githubToken, slackAppToken, slackChannelId, logDebugMessages, }) {
     env_1.setGithubArgs(githubOwner, githubRepo, githubToken);
-    if (logDebugMessages) {
-        console.log('enabling debugging');
+    if (logDebugMessages == 'true') {
         debug_1.enableDebugging();
         debug_1.default.log = (...args) => console.log(...args);
     }

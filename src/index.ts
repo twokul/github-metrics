@@ -36,8 +36,7 @@ export async function run({
 }): Promise<void> {
   setGithubArgs(githubOwner, githubRepo, githubToken);
 
-  if (logDebugMessages) {
-    console.log('enabling debugging');
+  if (logDebugMessages == 'true') {
     enableDebugging();
     debug.log = (...args) => console.log(...args);
   }
