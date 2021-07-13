@@ -3,11 +3,11 @@ import { fetchMergedPullRequestNumbers } from '../utils/graphql-queries';
 import { loadPullRequest } from '../models/pull-request';
 import debug, { Debugger } from '../utils/debug';
 import { millisToHuman } from '../utils/duration-to-human';
-import { Metric, MetricData, percentiles } from '../metric';
+import { NumericMetric, NumericMetricData, percentiles } from '../metric';
 
-export default class TimeToMergeMetric implements Metric {
+export default class TimeToMergeMetric implements NumericMetric {
   debug: Debugger;
-  data: MetricData[];
+  data: NumericMetricData[];
   name = 'Pull Request Time-To-Merge';
   constructor(public interval: Interval) {
     this.debug = debug.extend('metrics:time-to-merge');
@@ -31,7 +31,7 @@ export default class TimeToMergeMetric implements Metric {
     let numbers = await fetchMergedPullRequestNumbers(this.interval);
     this.debug(`found merged PR numbers: %o`, numbers);
 
-    let data: MetricData[] = [];
+    let data = [];
 
     for (let number of numbers) {
       let pr = await loadPullRequest(number);
