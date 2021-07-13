@@ -1,7 +1,12 @@
 import { githubArgs } from './env';
 import { Interval, DateTime } from 'luxon';
 import { Octokit } from '@octokit/rest';
-import { WorkflowRun } from '../models/workflow-run';
+import {
+  WorkflowRun,
+  WorkflowRunData,
+  STATUS_TYPE,
+  CONCLUSION_TYPE,
+} from '../models/workflow-run';
 import debugBase from '../utils/debug';
 
 const MAX_PER_PAGE = 100;
@@ -38,17 +43,54 @@ export async function fetchWorkflows(): Promise<WorkflowData[]> {
   return workflowData;
 }
 
+export type FetchWorkflowRunsOptions = {
+  per_page?: number;
+  status?: STATUS_QUERY_TYPE;
+  branch?: string;
+};
+
+const DEFAULT_FETCH_WORKFLOW_RUNS_OPTIONS = {
+  per_page: MAX_PER_PAGE,
+};
+
+// @see https://docs.github.com/en/rest/reference/actions#list-workflow-runs
+// When listing workflow runs, the "status" field does double duty with the GH API.
+// It can be used to specify runs where the `status` *or* `conclusion` field
+// matches the passed parameter.
+type STATUS_QUERY_TYPE = STATUS_TYPE | CONCLUSION_TYPE;
+
+// Passing this status causes the API to only return workflow runs that
+// are both `conclusion:success` *and* `status:completed`
+export const STATUS_SUCCESS: STATUS_QUERY_TYPE = 'success';
+
+// Passing this causes the API to return workflow runs that have completed,
+// but may have a non-success status.
+export const STATUS_COMPLETED: STATUS_QUERY_TYPE = 'completed';
+
 export async function fetchWorkflowRuns(
   interval: Interval,
   workflowId: number | string,
-  per_page = MAX_PER_PAGE
+  options: FetchWorkflowRunsOptions = {}
 ): Promise<WorkflowRunResults> {
   const debug = debugBase.extend('api:fetch-workflow-runs:' + workflowId);
   let { repo, owner, token } = githubArgs();
   let client = new Octokit({ auth: token });
+  options = {
+    ...DEFAULT_FETCH_WORKFLOW_RUNS_OPTIONS,
+    ...options,
+  };
+
+  // Note: There appears to be a bug in the GH API where sometimes valid results
+  // are omitted when this parameter is passed, so we remove it from the API options
+  // here. Instead, we fetch *all* workflow runs and post-filter them in memory to include
+  // only those with a status or conclusion that matches this filter.
+  // @see https://github.community/t/bug-when-filtering-workflow-runs-by-status-success-some-runs-are-omitted/190014/1
+  let statusFilter = options.status;
+  if (options.status) {
+    delete options.status;
+  }
 
   let runData = [];
-  const status = 'success';
 
   let didLogCount = false;
   let didLogFirstFound = false;
@@ -60,8 +102,7 @@ export async function fetchWorkflowRuns(
       repo,
       owner,
       workflow_id: workflowId,
-      status,
-      per_page,
+      ...options,
     }
   )) {
     if (!didLogCount) {
@@ -106,7 +147,16 @@ export async function fetchWorkflowRuns(
     }
   } // end of paginationLoop
 
-  let runs = runData.map((data) => new WorkflowRun(data));
+  if (statusFilter) {
+    let total = runData.length;
+    runData = runData.filter(
+      (data) => data.status === statusFilter || data.conclusion === statusFilter
+    );
+    debug(
+      `Filtered result count by \`status="${statusFilter}"\` from ${total} to ${runData.length}`
+    );
+  }
+  let runs = runData.map((data) => new WorkflowRun(data as WorkflowRunData));
 
   return {
     runs,
