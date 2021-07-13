@@ -1,12 +1,12 @@
 import { Interval } from 'luxon';
 import { fetchMergedPullRequestNumbers } from '../utils/graphql-queries';
 import debug, { Debugger } from '../utils/debug';
-import { Metric, MetricData } from '../metric';
+import { NumericMetric, NumericMetricData } from '../metric';
 import { pluralize } from '../utils/pluralize';
 
-export default class MergedPRsMetric implements Metric {
+export default class MergedPRsMetric implements NumericMetric {
   debug: Debugger;
-  data: MetricData[];
+  data: NumericMetricData[];
   didRun: boolean = false;
   name = 'Merged Pull Requests';
   constructor(public interval: Interval) {
@@ -26,8 +26,7 @@ export default class MergedPRsMetric implements Metric {
     let numbers = await fetchMergedPullRequestNumbers(this.interval);
     this.debug(`found merged PR numbers: %o`, numbers);
 
-    let data: MetricData[] = numbers.map((number) => ({ value: number }));
-    this.data = data;
+    this.data = numbers.map((number) => ({ value: number }));
     this.didRun = true;
   }
 }

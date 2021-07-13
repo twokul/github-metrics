@@ -6,11 +6,11 @@ import {
 } from '../utils/api-requests';
 import debug, { Debugger } from '../utils/debug';
 import { durationToHuman, millisToHuman } from '../utils/duration-to-human';
-import { Metric, MetricData, percentiles } from '../metric';
+import { NumericMetric, NumericMetricData, percentiles } from '../metric';
 
-export default class WorkflowDurationMetric implements Metric {
+export default class WorkflowDurationMetric implements NumericMetric {
   debug: Debugger;
-  data: MetricData[];
+  data: NumericMetricData[];
   didRun = false;
   workflowId: number | string;
   workflowName: string;
@@ -47,7 +47,7 @@ export default class WorkflowDurationMetric implements Metric {
     });
     this.debug(`found ${runs.length} workflow runs`);
 
-    let data: MetricData[] = [];
+    let data: NumericMetricData[] = [];
     runs.forEach((run) => {
       this.debug(`run #${run.id} duration: ${durationToHuman(run.duration)}`);
       data.push({ value: run.duration.toMillis() });
