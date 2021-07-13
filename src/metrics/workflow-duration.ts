@@ -1,5 +1,9 @@
 import { Interval } from 'luxon';
-import { fetchWorkflowRuns, WorkflowData } from '../utils/api-requests';
+import {
+  fetchWorkflowRuns,
+  WorkflowData,
+  STATUS_SUCCESS,
+} from '../utils/api-requests';
 import debug, { Debugger } from '../utils/debug';
 import { durationToHuman, millisToHuman } from '../utils/duration-to-human';
 import { Metric, MetricData, percentiles } from '../metric';
@@ -38,7 +42,9 @@ export default class WorkflowDurationMetric implements Metric {
   }
 
   async run(): Promise<void> {
-    let { runs } = await fetchWorkflowRuns(this.interval, this.workflowId);
+    let { runs } = await fetchWorkflowRuns(this.interval, this.workflowId, {
+      status: STATUS_SUCCESS,
+    });
     this.debug(`found ${runs.length} workflow runs`);
 
     let data: MetricData[] = [];

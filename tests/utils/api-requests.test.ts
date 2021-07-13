@@ -3,6 +3,7 @@ import setupPolly from '../setup-polly';
 import {
   fetchWorkflowRuns,
   fetchWorkflows,
+  STATUS_SUCCESS,
 } from '../../src/utils/api-requests';
 
 describe('api-requests', () => {
@@ -42,12 +43,30 @@ describe('api-requests', () => {
     const workflowId = 'source-of-run-data.yml';
     const start = DateTime.fromISO('2021-05-09T22:30:00Z');
     const end = DateTime.fromISO('2021-05-10T13:40:00Z');
+
+    // This interval includes workflow runs number 1 through 11 inclusive,
+    // @see https://github.com/bantic/github-metrics-tests/actions/workflows/source-of-run-data.yml
     const interval = Interval.fromDateTimes(start, end);
 
-    test('finds only successful runs', async () => {
+    test('finds all runs when no status is specified', async () => {
+      // To view JSON API reponse run:
+      //   gh api -X GET /repos/bantic/github-metrics-tests/actions/workflows/source-of-run-data.yml/runs
       let { runs } = await fetchWorkflowRuns(interval, workflowId);
-      expect(runs.length).toBe(8);
+      expect(runs.length).toBe(11);
 
+      expect(runs.filter((run) => run.conclusion === 'success').length).toBe(8);
+      expect(runs.filter((run) => run.conclusion === 'failure').length).toBe(2);
+      expect(runs.filter((run) => run.conclusion === 'cancelled').length).toBe(
+        1
+      );
+      expect(runs.filter((run) => run.status === 'completed').length).toBe(11);
+    });
+
+    test('finds only successful runs when status=success', async () => {
+      let { runs } = await fetchWorkflowRuns(interval, workflowId, {
+        status: STATUS_SUCCESS,
+      });
+      expect(runs.length).toBe(8);
       for (let run of runs) {
         expect(run.conclusion).toBe('success');
       }
@@ -61,7 +80,9 @@ describe('api-requests', () => {
         DateTime.fromISO('2021-05-10T13:31:50Z')
       );
 
-      let results = await fetchWorkflowRuns(shortInterval, workflowId);
+      let results = await fetchWorkflowRuns(shortInterval, workflowId, {
+        status: STATUS_SUCCESS,
+      });
       let { runs } = results;
       expect(runs.length).toBe(6);
 
@@ -72,7 +93,7 @@ describe('api-requests', () => {
       let paginatedResults = await fetchWorkflowRuns(
         shortInterval,
         workflowId,
-        runs.length - 1
+        { per_page: runs.length - 1, status: STATUS_SUCCESS }
       );
       let { meta } = paginatedResults;
 
@@ -93,7 +114,7 @@ describe('api-requests', () => {
       let { runs, meta } = await fetchWorkflowRuns(
         soloRunInterval,
         workflowId,
-        1
+        { per_page: 1, status: STATUS_SUCCESS }
       );
 
       expect(meta.total_pages).toBe(2);

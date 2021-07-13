@@ -1,10 +1,23 @@
 import { DateTime, Duration } from 'luxon';
 import debug, { Debugger } from '../utils/debug';
 
+// Possible values for "status" and "conclusion" are listed in Github's docs here:
+// https://docs.github.com/en/rest/reference/checks#create-a-check-run
+export type STATUS_TYPE = 'queued' | 'in_progress' | 'completed';
+export type CONCLUSION_TYPE =
+  | 'action_required'
+  | 'cancelled'
+  | 'failure'
+  | 'neutral'
+  | 'success'
+  | 'skipped'
+  | 'stale'
+  | 'timed_out';
+
 export interface WorkflowRunData {
   id: number;
-  status: string;
-  conclusion: string;
+  status: STATUS_TYPE;
+  conclusion: CONCLUSION_TYPE;
   workflow_id: number;
   check_suite_id: number;
   created_at: string;
@@ -14,8 +27,8 @@ export interface WorkflowRunData {
 export class WorkflowRun {
   id: number;
   debug: Debugger;
-  status: string;
-  conclusion: string;
+  status: STATUS_TYPE;
+  conclusion: CONCLUSION_TYPE;
   workflowId: number;
   checkSuiteId: number;
   createdAt: DateTime;
