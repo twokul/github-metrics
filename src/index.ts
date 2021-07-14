@@ -50,7 +50,7 @@ function loadCommandLineConfiguration(): CommandLineConfiguration {
     process.env.POST_TO_SLACK || core.getInput('post-to-slack');
 
   const configYml =
-    process.env.CONFIG_YML || core.getInput('configYml') || DEFAULT_CONFIG_YML;
+    process.env.CONFIG_YML || core.getInput('config-yml') || DEFAULT_CONFIG_YML;
   const config = parse(configYml);
 
   return {
