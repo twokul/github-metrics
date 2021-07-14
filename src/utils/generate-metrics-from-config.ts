@@ -2,8 +2,11 @@ import { Metric, METRIC_NAME_TO_CONSTRUCTOR } from '../metric';
 import { WorkflowData } from './api-requests';
 import { strict as assert } from 'assert';
 import { getInterval, Period, stringToPeriod } from './date';
+import debugBase from './debug';
 
 const DEFAULT_PERIOD = Period.WEEK;
+
+const debug = debugBase.extend('generate-metrics-from-config');
 
 // This is the schema of the config yml file.
 export type MetricsConfig = {
@@ -87,6 +90,8 @@ export function generateMetrics(
 
   const interval = getIntervalFromConfig(config);
 
+  debug(`Got interval: ${interval.toString()}`);
+
   let metricConfigs = config['metrics'] || [];
 
   let metrics: Metric[] = [];
@@ -97,6 +102,11 @@ export function generateMetrics(
 
     if (isWorkflowMetric(name)) {
       let workflows = findIncludedWorkflows(allWorkflows, config);
+      debug(
+        `For metric "${name}", config: %o, filtered ${allWorkflows.length} -> ${workflows.length} workflows: %o`,
+        config,
+        workflows.map(({ path }) => path)
+      );
       let options = config.options || {};
 
       workflows.forEach((workflow) => {
