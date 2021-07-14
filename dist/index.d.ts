@@ -1,9 +1,17 @@
 /**
- * Loads the configuration and generates an overall report
- * based on the metric(s) requested in the configuration.
+ * The function that runs the following workflow:
  *
- * Posts to slack if the `postToSlack` config option is true.
+ * - Creates both Github and Slack clients
+ * - Generates a weekly pull requests report
+ * - Posts a message on Slack
  *
  * @public
  */
-export declare function run(): Promise<void>;
+export declare function run({ githubOwner, githubRepo, githubToken, slackAppToken, slackChannelId, logDebugMessages, }: {
+    githubOwner: string;
+    githubRepo: string;
+    githubToken: string;
+    slackAppToken: string;
+    slackChannelId: string;
+    logDebugMessages: string;
+}): Promise<void>;
