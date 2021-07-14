@@ -25,5 +25,13 @@ inputs:
     description: 'Slack Channel Id'
   log-debug-messages:
     required: false
-    default: false
+    default: "false"
     description: Show all debug logs
+  post-to-slack:
+    required: false
+    default: "true"
+    description: Whether to post to slack
+  config-yml:
+    required: false
+    default: ""
+    description: "Configuration yml file"
