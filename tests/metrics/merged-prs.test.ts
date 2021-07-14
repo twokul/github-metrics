@@ -1,6 +1,6 @@
 import setupPolly from '../setup-polly';
 import { Interval, DateTime } from 'luxon';
-import MergedPRsMetric from '../../src/metrics/merged-prs';
+import MergedPRsMetric from '../../src/metrics/pull-request/merged';
 
 describe('metric: MergedPRsMetric', () => {
   setupPolly();

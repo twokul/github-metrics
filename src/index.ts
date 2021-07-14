@@ -2,70 +2,98 @@ import * as core from '@actions/core';
 import GithubMetrics from './github-metrics';
 import { WebClient } from '@slack/web-api';
 import { constructSlackMessage } from './utils/slack';
-import TimeToMergeMetric from './metrics/time-to-merge';
-import MergedPRsMetric from './metrics/merged-prs';
 import { setGithubArgs } from './utils/env';
-import { getInterval, Period } from './utils/date';
 import { fetchWorkflows } from './utils/api-requests';
-import WorkflowDurationMetric from './metrics/workflow-duration';
 import debug, { enableDebugging } from './utils/debug';
+import { parse } from 'yaml';
+import {
+  MetricsConfig,
+  generateMetrics,
+} from './utils/generate-metrics-from-config';
 
-/**
- * The function that runs the following workflow:
- *
- * - Creates both Github and Slack clients
- * - Generates a weekly pull requests report
- * - Posts a message on Slack
- *
- * @public
- */
-export async function run({
-  githubOwner,
-  githubRepo,
-  githubToken,
-  slackAppToken,
-  slackChannelId,
-  logDebugMessages,
-}: {
+const DEFAULT_CONFIG_YML = `
+period: 'week'
+
+# Runs all metrics, by default
+metrics:
+ - name: 'pull-request/merged'
+ - name: 'pull-request/time-to-merge'
+ - name: 'workflow/duration'
+ - name: 'workflow/success'
+`.trim();
+
+type CommandLineConfiguration = {
   githubOwner: string;
   githubRepo: string;
   githubToken: string;
-  slackAppToken: string;
   slackChannelId: string;
-  logDebugMessages: string;
-}): Promise<void> {
-  setGithubArgs(githubOwner, githubRepo, githubToken);
+  slackAppToken: string;
+  postToSlack: boolean;
+  logDebugMessages: boolean;
+  metricsConfig: MetricsConfig;
+};
 
-  if (logDebugMessages == 'true') {
+function loadCommandLineConfiguration(): CommandLineConfiguration {
+  const githubOwner = process.env.GITHUB_OWNER || core.getInput('github-owner');
+  const githubRepo = process.env.GITHUB_REPO || core.getInput('github-repo');
+  const githubToken = process.env.GITHUB_TOKEN || core.getInput('github-token');
+  const slackChannelId =
+    process.env.SLACK_CHANNEL_ID || core.getInput('slack-channel-id');
+  const slackAppToken =
+    process.env.SLACK_APP_TOKEN || core.getInput('slack-app-token');
+  const logDebugMessages =
+    process.env.LOG_DEBUG_MESSAGES || core.getInput('log-debug-messages');
+  const postToSlack =
+    process.env.POST_TO_SLACK || core.getInput('post-to-slack');
+
+  const configYml =
+    process.env.CONFIG_YML || core.getInput('configYml') || DEFAULT_CONFIG_YML;
+  const config = parse(configYml);
+
+  return {
+    githubOwner,
+    githubRepo,
+    githubToken,
+    slackChannelId,
+    slackAppToken,
+    postToSlack: postToSlack === 'true',
+    logDebugMessages: logDebugMessages === 'true',
+    metricsConfig: config,
+  };
+}
+
+/**
+ * Loads the configuration and generates an overall report
+ * based on the metric(s) requested in the configuration.
+ *
+ * Posts to slack if the `postToSlack` config option is true.
+ *
+ * @public
+ */
+export async function run(): Promise<void> {
+  let config = loadCommandLineConfiguration();
+  setGithubArgs(config.githubOwner, config.githubRepo, config.githubToken);
+
+  if (config.logDebugMessages) {
     enableDebugging();
     debug.log = (...args) => console.log(...args);
   }
 
   try {
-    const slack = new WebClient(slackAppToken);
     const githubMetrics = new GithubMetrics({
-      token: githubToken,
+      token: config.githubToken,
     });
     const weeklyReport = await githubMetrics.generateWeeklyReport({
-      owner: githubOwner,
-      repo: githubRepo,
+      owner: config.githubOwner,
+      repo: config.githubRepo,
     });
     const metricsDocumentationUrl = 'https://git.io/JqCGq';
 
-    const weekEndingNow = getInterval(Period.WEEK);
-
-    const timeToMerge = new TimeToMergeMetric(weekEndingNow);
-    await timeToMerge.run();
-
-    const mergedPRs = new MergedPRsMetric(weekEndingNow);
-    await mergedPRs.run();
-
     const workflows = await fetchWorkflows();
-    let workflowDurationMetrics = [];
-    for (let workflow of workflows) {
-      let metric = new WorkflowDurationMetric(weekEndingNow, workflow);
+    const metrics = generateMetrics(config.metricsConfig, workflows);
+
+    for (const metric of metrics) {
       await metric.run();
-      workflowDurationMetrics.push(metric);
     }
 
     const message = constructSlackMessage({
@@ -79,22 +107,12 @@ export async function run({
         {
           text: `Number Of Pull Requests Opened: *${weeklyReport.openedPullRequests.length}*`,
         },
-        {
-          text: `${mergedPRs.name}: ${mergedPRs.summary}`,
-        },
+        ...metrics.map((metric) => ({
+          text: [metric.name, metric.summary].join('\n'),
+        })),
         {
           text: `Number Of Pull Requests Closed: *${weeklyReport.closedPullRequests.length}*`,
         },
-        {
-          text: [timeToMerge.name, timeToMerge.summary].join('\n'),
-        },
-        ...workflowDurationMetrics
-          .filter((metric) => metric.data.length > 0)
-          .map((metric) => {
-            return {
-              text: [metric.name, metric.summary].join('\n'),
-            };
-          }),
         {
           text: `Average Pull Request Idle Time: *${
             weeklyReport.averageIdleTime
@@ -109,33 +127,23 @@ export async function run({
           text: `Number Of Hotfixes: *${weeklyReport.hotfixes}*`,
         },
       ],
-      channel: slackChannelId,
+      channel: config.slackChannelId,
     });
-    const result = await slack.chat.postMessage(message);
 
-    core.debug(
-      `Successfully send message ${result.ts} in conversation ${slackChannelId}`
-    );
+    core.info(JSON.stringify(message, null, 2));
+
+    const slack = new WebClient(config.slackAppToken);
+    if (config.postToSlack) {
+      const result = await slack.chat.postMessage(message);
+      core.debug(
+        `Successfully posted message ${result.ts} in conversation ${config.slackChannelId}`
+      );
+    } else {
+      core.debug(`Not posting message to slack`);
+    }
   } catch (error) {
     core.setFailed(error.message);
   }
 }
 
-const githubOwner = process.env.GITHUB_OWNER || core.getInput('github-owner');
-const githubRepo = process.env.GITHUB_REPO || core.getInput('github-repo');
-const githubToken = process.env.GITHUB_TOKEN || core.getInput('github-token');
-const slackChannelId =
-  process.env.SLACK_CHANNEL_ID || core.getInput('slack-channel-id');
-const slackAppToken =
-  process.env.SLACK_APP_TOKEN || core.getInput('slack-app-token');
-const logDebugMessages =
-  process.env.LOG_DEBUG_MESSAGES || core.getInput('log-debug-messages');
-
-run({
-  githubOwner,
-  githubRepo,
-  githubToken,
-  slackAppToken,
-  slackChannelId,
-  logDebugMessages,
-});
+run();

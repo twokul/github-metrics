@@ -3,26 +3,24 @@ import {
   fetchWorkflowRuns,
   WorkflowData,
   STATUS_SUCCESS,
-} from '../utils/api-requests';
-import debug, { Debugger } from '../utils/debug';
-import { durationToHuman, millisToHuman } from '../utils/duration-to-human';
-import { NumericMetric, NumericMetricData, percentiles } from '../metric';
+} from '../../utils/api-requests';
+import debug, { Debugger } from '../../utils/debug';
+import { durationToHuman, millisToHuman } from '../../utils/duration-to-human';
+import { NumericMetric, NumericMetricData, percentiles } from '../../metric';
 
 export default class WorkflowDurationMetric implements NumericMetric {
   debug: Debugger;
   data: NumericMetricData[];
   didRun = false;
-  workflowId: number | string;
-  workflowName: string;
-  constructor(public interval: Interval, workflowData: WorkflowData) {
-    this.workflowId = workflowData.id;
-    this.workflowName = workflowData.name;
-    this.debug = debug.extend('metrics:workflow-duration:' + this.workflowId);
+  constructor(public interval: Interval, public workflowData: WorkflowData) {
+    this.debug = debug.extend(
+      'metrics:workflow-duration:' + this.workflowData.id
+    );
     this.data = [];
   }
 
   get name(): string {
-    return `Workflow Duration: ${this.workflowName}`;
+    return `Workflow Duration for: "${this.workflowData.name}" (id ${this.workflowData.id})`;
   }
 
   get summary(): string {
@@ -42,10 +40,12 @@ export default class WorkflowDurationMetric implements NumericMetric {
   }
 
   async run(): Promise<void> {
-    let { runs } = await fetchWorkflowRuns(this.interval, this.workflowId, {
-      status: STATUS_SUCCESS,
-    });
-    this.debug(`found ${runs.length} workflow runs`);
+    let { runs } = await fetchWorkflowRuns(
+      this.interval,
+      this.workflowData.id,
+      { status: STATUS_SUCCESS }
+    );
+    this.debug(`found ${runs.length} workflow runs for ${this.workflowData}`);
 
     let data: NumericMetricData[] = [];
     runs.forEach((run) => {

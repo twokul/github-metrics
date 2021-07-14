@@ -1,4 +1,4 @@
-import TimeToMergeMetric from '../../src/metrics/time-to-merge';
+import TimeToMergeMetric from '../../src/metrics/pull-request/time-to-merge';
 import setupPolly from '../setup-polly';
 import { Interval, DateTime } from 'luxon';
 import { percentiles } from '../../src/metric';
