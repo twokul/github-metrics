@@ -50,7 +50,8 @@
     "@actions/core": "^1.2.6",
     "@octokit/graphql": "^4.6.1",
     "@slack/web-api": "^6.1.0",
-    "luxon": "^1.26.0"
+    "luxon": "^1.26.0",
+    "yaml": "^1.10.2"
   },
   "jest": {
     "setupFilesAfterEnv": [
