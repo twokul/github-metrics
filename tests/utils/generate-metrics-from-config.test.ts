@@ -12,6 +12,9 @@ const NOW_TO_ISO = '2021-03-11T17:35:54.000Z';
 const STUBBED_NOW = DateTime.fromISO(NOW_TO_ISO).toUTC();
 
 const makeWorkflow = (path: string) => ({
+  // Both name and id are unused for the purposes of these tests.
+  // Only the path matters, because it alone is used for filtering in/out
+  // workflows
   name: 'unused',
   id: 'unused-id',
   path,
@@ -35,14 +38,14 @@ describe('generateMetrics', () => {
 
     expect(() => {
       generateMetrics({ metrics: [{ name }] }, fakeWorkflows);
-    }).toThrowError(/Unknown metric/);
+    }).toThrowError(/Invalid configuration.*Unknown metric/);
   });
 
   test(`extra top-level keys throws`, () => {
     let badConfig = { metrics: [], badkey: [] } as unknown as MetricsConfig;
     expect(() => {
       generateMetrics(badConfig, fakeWorkflows);
-    }).toThrowError(/Invalid configuration/);
+    }).toThrowError(/Invalid configuration.*badkey/);
   });
 
   test(`each metric config must include name`, () => {
@@ -50,14 +53,14 @@ describe('generateMetrics', () => {
       metrics: [{}],
     } as unknown as MetricsConfig;
     expect(() => generateMetrics(noNameConfig)).toThrowError(
-      /Invalid configuration/
+      /Invalid configuration.*name/
     );
 
     let extraPropConfig = {
-      metrics: [{ title: 'this is not allowed' }],
+      metrics: [{ name: 'workflow/success', title: 'this is not allowed' }],
     } as unknown as MetricsConfig;
     expect(() => generateMetrics(extraPropConfig)).toThrowError(
-      /Invalid configuration/
+      /Invalid configuration.*title/
     );
   });
 
@@ -107,7 +110,7 @@ describe('generateMetrics', () => {
 
     let metric = metrics[0] as WorkflowSuccessMetric;
     expect(metric).toBeInstanceOf(WorkflowSuccessMetric);
-    expect(metric.workflowRunOptions).toHaveProperty('branch', 'foo');
+    expect(metric.workflowRunOptions).toEqual({ branch: 'foo' });
   });
 
   test(`period can be specified in config`, () => {
@@ -133,7 +136,7 @@ describe('generateMetrics', () => {
   test(`invalid period throws`, () => {
     let badConfig = { period: 'fortnight', metrics: [] };
     expect(() => generateMetrics(badConfig)).toThrowError(
-      /Invalid configuration/
+      /Invalid configuration.*Period.*fortnight/
     );
   });
 });

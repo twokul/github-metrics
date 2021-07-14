@@ -22,6 +22,9 @@ metrics:
  - name: 'workflow/success'
 `.trim();
 
+// Configuration options that can be passed
+// via environment variables or, when run via
+// a github actions (GHA) workflow, GHA input values.
 type CommandLineConfiguration = {
   githubOwner: string;
   githubRepo: string;
@@ -93,6 +96,10 @@ export async function run(): Promise<void> {
     const metrics = generateMetrics(config.metricsConfig, workflows);
 
     for (const metric of metrics) {
+      // We could run these concurrently via Promise.all, but that would
+      // interleave the debug messages.  We usually don't care (a lot) about how
+      // long it takes to run this report, so trading off some speed for better
+      // debug observability is a good choice.
       await metric.run();
     }
 

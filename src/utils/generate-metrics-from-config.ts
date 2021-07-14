@@ -94,7 +94,6 @@ export function generateMetrics(
   for (let config of metricConfigs) {
     let { name } = config;
     let ctor = METRIC_NAME_TO_CONSTRUCTOR[name];
-    assert(ctor, `Unknown metric with name "${name}"`);
 
     if (isWorkflowMetric(name)) {
       let workflows = findIncludedWorkflows(allWorkflows, config);
@@ -152,6 +151,11 @@ function validatePeriod(str: string): void {
 function validateMetricConfig(metricConfig: any): void {
   let { name } = metricConfig;
   assert(name, `Invalid configuration must include name`);
+
+  assert(
+    name in METRIC_NAME_TO_CONSTRUCTOR,
+    `Invalid configuration. Unknown metric name "${name}"`
+  );
 
   let _isWorkflowMetric = isWorkflowMetric(name);
 
