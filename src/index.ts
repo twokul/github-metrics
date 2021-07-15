@@ -74,15 +74,14 @@ function loadCommandLineConfiguration(): CommandLineConfiguration {
  * @public
  */
 export async function run(): Promise<void> {
-  let config = loadCommandLineConfiguration();
-  setGithubArgs(config.githubOwner, config.githubRepo, config.githubToken);
-
-  if (config.logDebugMessages) {
-    enableDebugging();
-    debug.log = (...args) => console.log(...args);
-  }
-
   try {
+    let config = loadCommandLineConfiguration();
+    setGithubArgs(config.githubOwner, config.githubRepo, config.githubToken);
+
+    if (config.logDebugMessages) {
+      enableDebugging();
+      debug.log = (...args) => console.log(...args);
+    }
     const githubMetrics = new GithubMetrics({
       token: config.githubToken,
     });
