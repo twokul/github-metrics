@@ -82,7 +82,7 @@ metrics:        # array of metric specifiers
 
 Note on the include.paths and exclude.paths:
 
-- exclude paths take precendence: If a path is listen in exclude.paths, that workflow will never be included (even if its path is also in include.paths)
+- exclude paths take precendence: If a path is listed in exclude.paths, that workflow will never be included (even if its path is also in include.paths)
 - If include.paths and/or exclude.paths are passed, only matching workflows are included -- all others are ignored
 - If neither include.paths or exclude.paths are passed, all
   workflows will be included
