@@ -19,6 +19,7 @@ type WorkflowRunResults = {
 export type WorkflowData = {
   id: string | number;
   name: string;
+  path?: string;
 };
 
 export async function fetchWorkflows(): Promise<WorkflowData[]> {
@@ -27,9 +28,10 @@ export async function fetchWorkflows(): Promise<WorkflowData[]> {
   let client = new Octokit({ auth: token });
   let result = await client.actions.listRepoWorkflows({ repo, owner });
 
-  let workflowData = result.data.workflows.map(({ id, name }) => ({
+  let workflowData = result.data.workflows.map(({ id, name, path }) => ({
     id,
     name,
+    path,
   }));
   debug(`Found ${result.data.workflows.length} workflows: %o`, workflowData);
 

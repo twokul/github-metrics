@@ -2,8 +2,8 @@ import { Period, getInterval } from '../../src/utils/date';
 import * as td from 'testdouble';
 import { DateTime } from 'luxon';
 
-const STUBBED_NOW = DateTime.fromISO('2021-03-11T17:35:54.00Z').toUTC();
 const NOW_TO_ISO = '2021-03-11T17:35:54.000Z';
+const STUBBED_NOW = DateTime.fromISO(NOW_TO_ISO).toUTC();
 
 describe('Date Utils', () => {
   beforeAll(() => {

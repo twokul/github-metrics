@@ -1,9 +1,9 @@
 import { Duration, Interval } from 'luxon';
-import { fetchMergedPullRequestNumbers } from '../utils/graphql-queries';
-import { loadPullRequest } from '../models/pull-request';
-import debug, { Debugger } from '../utils/debug';
-import { millisToHuman } from '../utils/duration-to-human';
-import { NumericMetric, NumericMetricData, percentiles } from '../metric';
+import { fetchMergedPullRequestNumbers } from '../../utils/graphql-queries';
+import { loadPullRequest } from '../../models/pull-request';
+import debug, { Debugger } from '../../utils/debug';
+import { millisToHuman } from '../../utils/duration-to-human';
+import { NumericMetric, NumericMetricData, percentiles } from '../../metric';
 
 export default class TimeToMergeMetric implements NumericMetric {
   debug: Debugger;

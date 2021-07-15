@@ -1,6 +1,6 @@
 import { Interval, DateTime } from 'luxon';
 import setupPolly from '../setup-polly';
-import WorkflowDuration from '../../src/metrics/workflow-duration';
+import WorkflowDuration from '../../src/metrics/workflow/duration';
 import { percentiles } from '../../src/metric';
 
 /**

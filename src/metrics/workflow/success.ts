@@ -4,9 +4,9 @@ import {
   WorkflowData,
   FetchWorkflowRunsOptions,
   STATUS_COMPLETED,
-} from '../utils/api-requests';
-import debug, { Debugger } from '../utils/debug';
-import { Metric } from '../metric';
+} from '../../utils/api-requests';
+import debug, { Debugger } from '../../utils/debug';
+import { Metric } from '../../metric';
 
 export default class WorkflowSuccessMetric implements Metric {
   data: {
@@ -15,7 +15,9 @@ export default class WorkflowSuccessMetric implements Metric {
   }[] = [];
   debug: Debugger;
   didRun = false;
-  name = 'Workflow Success Rate';
+  get name(): string {
+    return `Workflow Success Rate for "${this.workflowData.name}" (id ${this.workflowData.id})`;
+  }
 
   constructor(
     public interval: Interval,
@@ -60,7 +62,7 @@ export default class WorkflowSuccessMetric implements Metric {
       this.workflowData.id,
       options
     );
-    this.debug(`Found ${runs.length} workflow runs`);
+    this.debug(`Found ${runs.length} workflow runs for ${this.workflowData}`);
     this.data = runs.map(({ status, conclusion }) => ({ status, conclusion }));
   }
 }

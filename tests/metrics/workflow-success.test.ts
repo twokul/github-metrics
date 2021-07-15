@@ -1,6 +1,6 @@
 import { Interval, DateTime } from 'luxon';
 import setupPolly from '../setup-polly';
-import WorkflowSuccess from '../../src/metrics/workflow-success';
+import WorkflowSuccess from '../../src/metrics/workflow/success';
 
 /**
  *  These tests rely on the source-of-run-data.yml Workflow Runs:

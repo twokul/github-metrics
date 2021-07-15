@@ -1,8 +1,8 @@
 import { Interval } from 'luxon';
-import { fetchMergedPullRequestNumbers } from '../utils/graphql-queries';
-import debug, { Debugger } from '../utils/debug';
-import { NumericMetric, NumericMetricData } from '../metric';
-import { pluralize } from '../utils/pluralize';
+import { fetchMergedPullRequestNumbers } from '../../utils/graphql-queries';
+import debug, { Debugger } from '../../utils/debug';
+import { NumericMetric, NumericMetricData } from '../../metric';
+import { pluralize } from '../../utils/pluralize';
 
 export default class MergedPRsMetric implements NumericMetric {
   debug: Debugger;

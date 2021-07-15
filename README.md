@@ -13,6 +13,80 @@ Github Action that tracks the following metrics on a Github repository:
 If you would like to know more about the metrics themselves, please see
 [metrics.md](./metrics.md).
 
+## Usage
+
+To use this github action, specify it in your github workflow file. Here's an example:
+
+```
+name: Report Metrics
+
+on:
+  schedule:
+    # At 16:00 UTC every Friday (aka 11am EST, 12pm EDT)
+    - cron: "0 16 * * 5"
+
+jobs:
+  report:
+    name: Slack
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: Addepar/github-metrics@v1.2.0
+        with:
+          github-owner: bantic
+          github-repo: github-metrics
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          slack-app-token: ${{secrets.SLACK_APP_TOKEN}}
+          slack-channel-id: ${{secrets.SLACK_CHANNEL_ID}}
+          post-to-slack: "true"
+          log-debug-messages: "true"
+```
+
+By default, the report will include all metrics. Workflow-related metrics will be run for all active workflows.
+To change this, specify a config-yml input. See "Configuration" below.
+
+### Configuration
+
+The action can accept a configuration string in yml format in
+order to specify the period to report over, which metrics to run, and for workflow-related metrics which workflows should be included.
+
+Here's an example:
+
+```
+period: "month" # run a 1-month interval, ending now.
+                # other valid values are "day" and "week"
+metrics:        # array of metric specifiers
+  - name: "workflow/success"   # 'name' is required
+    # Only workflows that match the paths listed here
+    # will run the WorkflowSuccess metric
+    include:
+      paths:
+        - .github/workflows/my-workflow.yml
+    # Workflows matching these paths will be excluded
+    exclude:
+      paths:
+        - .github/workflows/dont-run-this-one.yml
+    # Extra options for the metric can be passed using "options"
+    options:
+      branch: 'master'
+
+  # When no include/exclude are passed,
+  # this WorkflowDuration metric will run for every available
+  # workflow
+  - name: "workflow/duration"
+
+  # The non-workflow metrics do not accept additional
+  # configuration properties
+  - name: "pull-request/time-to-merge"
+```
+
+Note on the include.paths and exclude.paths:
+
+- exclude paths take precendence: If a path is listed in exclude.paths, that workflow will never be included (even if its path is also in include.paths)
+- If include.paths and/or exclude.paths are passed, only matching workflows are included -- all others are ignored
+- If neither include.paths or exclude.paths are passed, all
+  workflows will be included
+
 ## Development
 
 - `yarn build` (build the project)
@@ -68,10 +142,35 @@ tests using the chrome inspector for debugging, run:
 node --inspect-brk node_modules/.bin/jest --runInBand tests/metrics
 ```
 
+Both of the above commands can be run without `--inspect-brk` if you just want to run the script or test in isolation and don't need the debugger.
+
 ### Use DEBUG=github-metrics:\*
 
 The codebase uses the [debug package](https://github.com/visionmedia/debug#readme) to log debugging info.
 Set the env var `DEBUG` to view logs. To see all of them, use `DEBUG=github-metrics:*`. See debug's docs for more.
+
+### Simulate a run locally
+
+In order to simulate a run of this action, run the `index.ts` file with some or all of the following environment variables:
+
+- (required) GITHUB_TOKEN
+- (required) GITHUB_OWNER
+- (required) GITHUB_REPO
+- (optional) `export POST_TO_SLACK=false` - to skip posting to a slack channel and display the output on the console only.
+- (optional) CONFIG_YML - to use a specific configuration. If not specified, default config is used. See Configuration section
+
+Note: In order to set a multi-line yml file as an environment variable, a simple way is to write the yml file and then `cat` it into the env var, e.g.:
+
+```
+vim my-config.yml # create/edit file
+export CONFIG_YML=`cat my-config.yml`
+```
+
+After setting the env vars appropriately, run the index.ts script:
+
+```
+node -r ts-node src/index.ts
+```
 
 ## Documentation
 
