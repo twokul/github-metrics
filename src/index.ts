@@ -10,6 +10,9 @@ import {
   MetricsConfig,
   generateMetrics,
 } from './utils/generate-metrics-from-config';
+import { pluralize } from './utils/pluralize';
+import { indent } from './utils/indent';
+import { bold } from './utils/str-fmt';
 
 const DEFAULT_CONFIG_YML = `
 period: 'week'
@@ -102,35 +105,69 @@ export async function run(): Promise<void> {
       await metric.run();
     }
 
+    let metricsWithData = metrics.filter((metric) => metric.hasData);
+    let metricsWithOutData = metrics.filter((metric) => !metric.hasData);
+
     const message = constructSlackMessage({
       header: `Weekly Metrics for ${weeklyReport.name} (${weeklyReport.startDate} - ${weeklyReport.endDate}) 📈`,
-      footer:
-        '_This is an automated post by <https://git.io/JqZ6w|github-metrics>._',
+      footer: `_This is an automated post by <${metricsDocumentationUrl}|github-metrics>._`,
       sections: [
         {
-          text: `<${weeklyReport.url}|View PRs on Github> | <${metricsDocumentationUrl}|About Metrics>`,
+          text: `<${weeklyReport.url}|View PRs on Github>`,
         },
         {
-          text: `Number Of Pull Requests Opened: *${weeklyReport.openedPullRequests.length}*`,
+          text: bold(
+            `Pull Requests: ${weeklyReport.openedPullRequests.length} Opened, ${weeklyReport.closedPullRequests.length} Closed`
+          ),
         },
-        ...metrics.map((metric) => ({
-          text: [metric.name, metric.summary].join('\n'),
+        {
+          text: bold(
+            pluralize(
+              'Average Pull Request Idle Time: %d Hour',
+              parseFloat(weeklyReport.averageIdleTime.toFixed(1))
+            )
+          ),
+        },
+        {
+          text: [
+            bold('Review Depth'),
+            ...indent(1, [
+              pluralize(
+                '%d Comment',
+                weeklyReport.aggregatedReviewDepth.comments
+              ),
+              pluralize(
+                '%d Review',
+                weeklyReport.aggregatedReviewDepth.reviews
+              ),
+              pluralize(
+                'by %d Reviewer',
+                weeklyReport.aggregatedReviewDepth.reviewers
+              ),
+            ]),
+          ].join('\n'),
+        },
+        {
+          text: bold(
+            pluralize('%d Hotfix Pull Request', weeklyReport.hotfixes)
+          ),
+        },
+        ...metricsWithData.map((metric) => ({
+          text: [bold(metric.name), ...indent(1, metric.summary)].join('\n'),
         })),
         {
-          text: `Number Of Pull Requests Closed: *${weeklyReport.closedPullRequests.length}*`,
-        },
-        {
-          text: `Average Pull Request Idle Time: *${
-            weeklyReport.averageIdleTime
-              ? weeklyReport.averageIdleTime.toFixed(1)
-              : null
-          } hours*`,
-        },
-        {
-          text: `Review Depth: *${weeklyReport.aggregatedReviewDepth.comments} comments, ${weeklyReport.aggregatedReviewDepth.reviews} reviews by ${weeklyReport.aggregatedReviewDepth.reviewers} people*`,
-        },
-        {
-          text: `Number Of Hotfixes: *${weeklyReport.hotfixes}*`,
+          text: [
+            bold(
+              `${pluralize(
+                '%d Metric',
+                metricsWithOutData.length
+              )} Without Data`
+            ),
+            ...indent(
+              1,
+              metricsWithOutData.map((metric) => metric.name)
+            ),
+          ].join('\n'),
         },
       ],
       channel: config.slackChannelId,
@@ -147,7 +184,8 @@ export async function run(): Promise<void> {
     } else {
       core.debug(`Not posting message to slack`);
     }
-  } catch (error) {
+  } catch (error: any) {
+    debug(`failed: ${error.message}`);
     core.setFailed(error.message);
   }
 }

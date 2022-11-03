@@ -28,7 +28,9 @@ export interface Metric {
   name: string;
   interval: Interval;
   data: any[];
-  summary: string;
+  hasData: boolean;
+  summary: string[];
+  didRun: boolean;
   run: () => Promise<void>;
 }
 

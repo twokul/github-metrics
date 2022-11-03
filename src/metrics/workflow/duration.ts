@@ -7,6 +7,7 @@ import {
 import debug, { Debugger } from '../../utils/debug';
 import { durationToHuman, millisToHuman } from '../../utils/duration-to-human';
 import { NumericMetric, NumericMetricData, percentiles } from '../../metric';
+import { pluralize } from '../../utils/pluralize';
 
 export default class WorkflowDurationMetric implements NumericMetric {
   debug: Debugger;
@@ -23,20 +24,29 @@ export default class WorkflowDurationMetric implements NumericMetric {
     return `Workflow Duration for: "${this.workflowData.name}" (id ${this.workflowData.id})`;
   }
 
-  get summary(): string {
+  get hasData() {
+    if (!this.didRun) {
+      throw new Error(`Must call run() first`);
+    }
+    return this.data.length > 0;
+  }
+
+  get summary() {
     if (!this.didRun) {
       throw new Error(`Cannot get summary before callling run()`);
     }
     if (this.data.length === 0) {
-      return 'No data';
+      return ['No data'];
     }
 
     let [p0, p50, p90, p100] = percentiles([0, 50, 90, 100], this);
-    let pValues = `p0: ${millisToHuman(p0)}; p50: ${millisToHuman(
-      p50
-    )}; p90: ${millisToHuman(p90)}; p100: ${millisToHuman(p100)}`;
-
-    return [`Successful run count: ${this.data.length}`, pValues].join('\n');
+    return [
+      pluralize('%d Successful run', this.data.length),
+      `p0 ${millisToHuman(p0)}`,
+      `p50 ${millisToHuman(p50)}`,
+      `p90 ${millisToHuman(p90)}`,
+      `p100 ${millisToHuman(p100)}`,
+    ];
   }
 
   async run(): Promise<void> {
@@ -45,7 +55,7 @@ export default class WorkflowDurationMetric implements NumericMetric {
       this.workflowData.id,
       { status: STATUS_SUCCESS }
     );
-    this.debug(`found ${runs.length} workflow runs for ${this.workflowData}`);
+    this.debug(`found %o workflow runs for %o`, runs.length, this.workflowData);
 
     let data: NumericMetricData[] = [];
     runs.forEach((run) => {

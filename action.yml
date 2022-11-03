@@ -3,8 +3,8 @@ name: 'Github Metrics'
 description: 'Post Pull Request Metrics on Slack'
 
 runs:
-  # highest available version
-  using: 'node12'
+  # highest available version, per https://docs.github.com/en/actions/creating-actions/metadata-syntax-for-github-actions#runsusing
+  using: 'node16'
   main: 'dist/index.js'
 
 inputs:

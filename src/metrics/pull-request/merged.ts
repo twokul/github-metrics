@@ -14,12 +14,18 @@ export default class MergedPRsMetric implements NumericMetric {
     this.data = [];
   }
 
-  get summary(): string {
+  get hasData() {
+    if (!this.didRun) {
+      throw new Error(`Must call run() first`);
+    }
+    return this.data.length > 0;
+  }
+
+  get summary() {
     if (!this.didRun) {
       throw new Error(`Must run metric before accessing data`);
     }
-    let count = this.data.length;
-    return `${count} merged pull ${pluralize('request', count)}`;
+    return [pluralize('%d Merged Pull Request', this.data.length)];
   }
 
   async run(): Promise<void> {

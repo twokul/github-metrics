@@ -27,12 +27,19 @@ export default class WorkflowSuccessMetric implements Metric {
     this.debug = debug.extend('metrics:workflow-run-success');
   }
 
-  get summary(): string {
+  get hasData() {
+    if (!this.didRun) {
+      throw new Error(`Must call run() first`);
+    }
+    return this.data.length > 0;
+  }
+
+  get summary() {
     if (!this.didRun) {
       throw new Error(`Cannot get sumary before calling run()`);
     }
     if (this.data.length === 0) {
-      return `No completed runs found.`;
+      return [`No completed runs found.`];
     }
 
     let success = this.data.filter((d) => d.conclusion === 'success').length;
@@ -44,7 +51,7 @@ export default class WorkflowSuccessMetric implements Metric {
         this.data.filter((d) => d.conclusion !== 'success')
       )}`
     );
-    return `${percent}% Succeeded (${success}/${total})`;
+    return [`${percent}% Succeeded (${success}/${total})`];
   }
 
   async run(): Promise<void> {
