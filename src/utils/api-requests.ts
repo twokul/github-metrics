@@ -1,6 +1,6 @@
 import { githubArgs } from './env';
 import { Interval, DateTime } from 'luxon';
-import { Octokit } from '@octokit/rest';
+import { Octokit } from './octokit';
 import {
   WorkflowRun,
   WorkflowRunData,
@@ -9,7 +9,7 @@ import {
 } from '../models/workflow-run';
 import debugBase from '../utils/debug';
 
-const MAX_PER_PAGE = 100;
+const MAX_PER_PAGE = 50;
 
 type WorkflowRunResults = {
   runs: WorkflowRun[];
@@ -98,56 +98,66 @@ export async function fetchWorkflowRuns(
   let didLogFirstFound = false;
   let page = 0;
 
-  paginationLoop: for await (const response of client.paginate.iterator(
-    client.rest.actions.listWorkflowRuns,
-    {
-      repo,
-      owner,
-      workflow_id: workflowId,
-      ...options,
-    }
-  )) {
-    if (!didLogCount) {
-      didLogCount = true;
-      debug(`found ${response.data.total_count} results`);
-    }
-    page++;
-
-    if (response.data.length === 0) {
-      debug(`exiting pagination because of a 0-length response`);
-      break paginationLoop;
-    }
-
-    let first = DateTime.fromISO(response.data[0].created_at).toUTC();
-    let last = DateTime.fromISO(
-      response.data[response.data.length - 1].created_at
-    ).toUTC();
-
-    debug(
-      `page #${page} ${response.data.length} items from ${first} -> ${last}`
-    );
-
-    for (let workflowRunData of response.data) {
-      let createdAt = DateTime.fromISO(workflowRunData.created_at);
-
-      switch (true) {
-        case interval.contains(createdAt):
-          if (!didLogFirstFound) {
-            debug(
-              `found first run in interval, keeping ${workflowRunData.id} because ${createdAt} is contained by ${interval}`
-            );
-            didLogFirstFound = true;
-          }
-          runData.push(workflowRunData);
-          break;
-        case interval.isAfter(createdAt):
-          debug(
-            `exiting pagination: workflow run ${workflowRunData.id} created at ${createdAt}, before the interval ${interval}`
-          );
-          break paginationLoop;
+  debug(`beginning pagination loop`);
+  try {
+    paginationLoop: for await (const response of client.paginate.iterator(
+      client.rest.actions.listWorkflowRuns,
+      {
+        repo,
+        owner,
+        workflow_id: workflowId,
+        ...options,
       }
-    }
-  } // end of paginationLoop
+    )) {
+      if (!didLogCount) {
+        didLogCount = true;
+        debug(`found ${response.data.total_count} results`);
+      }
+      page++;
+
+      if (response.data.length === 0) {
+        debug(`exiting pagination because of a 0-length response`);
+        break paginationLoop;
+      }
+
+      let first = DateTime.fromISO(response.data[0].created_at).toUTC();
+      let last = DateTime.fromISO(
+        response.data[response.data.length - 1].created_at
+      ).toUTC();
+
+      debug(
+        `page #${page} ${response.data.length} items from ${first} -> ${last}`
+      );
+
+      for (let workflowRunData of response.data) {
+        let createdAt = DateTime.fromISO(workflowRunData.created_at);
+
+        switch (true) {
+          case interval.contains(createdAt):
+            if (!didLogFirstFound) {
+              debug(
+                `found first run in interval, keeping ${workflowRunData.id} because ${createdAt} is contained by ${interval}`
+              );
+              didLogFirstFound = true;
+            }
+            runData.push(workflowRunData);
+            break;
+          case interval.isAfter(createdAt):
+            debug(
+              `exiting pagination: workflow run ${workflowRunData.id} created at ${createdAt}, before the interval ${interval}`
+            );
+            break paginationLoop;
+        }
+      }
+    } // end of paginationLoop
+  } catch (error) {
+    debug(`unexpected error %o`, error);
+    const emptyResponse = {
+      runs: [],
+      meta: { total_pages: 0 },
+    };
+    return emptyResponse;
+  }
 
   if (statusFilter) {
     let total = runData.length;
@@ -155,7 +165,10 @@ export async function fetchWorkflowRuns(
       (data) => data.status === statusFilter || data.conclusion === statusFilter
     );
     debug(
-      `Filtered result count by \`status="${statusFilter}"\` from ${total} to ${runData.length}`
+      `Filtered result count by \`status="%o"\` from %o to %o`,
+      statusFilter,
+      total,
+      runData.length
     );
   }
   let runs = runData.map((data) => new WorkflowRun(data as WorkflowRunData));

@@ -26,7 +26,7 @@ describe('metrics: WorkflowSuccess', () => {
     let metric = new WorkflowSuccess(interval, workflow);
     await metric.run();
     expect(metric.data.length).toBe(11);
-    expect(metric.summary).toContain('8/11');
-    expect(metric.summary).toContain('72.7%');
+    expect(metric.summary[0]).toContain('8/11');
+    expect(metric.summary[0]).toContain('72.7%');
   });
 });
