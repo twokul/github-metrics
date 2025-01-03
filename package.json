@@ -21,7 +21,7 @@
     "@babel/preset-env": "^7.13.10",
     "@babel/preset-typescript": "^7.13.0",
     "@microsoft/api-documenter": "^7.12.9",
-    "@microsoft/api-extractor": "^7.13.2",
+    "@microsoft/api-extractor": "^7.48.1",
     "@octokit/types": "^6.12.2",
     "@pollyjs/adapter-fetch": "^5.1.0",
     "@pollyjs/adapter-node-http": "^5.1.0",
