@@ -1,17 +1,18 @@
 import { PullRequest } from '../../src/github-client';
 import RepositoryReport from '../../src/reports/repository';
-import * as td from 'testdouble';
 import { DateTime } from 'luxon';
 import PRS_THIS_WEEK from '../fixtures/prs-this-week';
 
 describe('Repository Report', () => {
+  let origNow: any;
   beforeAll(() => {
-    td.replace(DateTime, 'now', () => {
-      return DateTime.fromISO('2021-03-11T17:35:54Z');
-    });
+    origNow = DateTime.now;
+    DateTime.now = () => DateTime.fromISO('2021-03-11T17:35:54Z');
   });
 
-  afterAll(() => td.reset());
+  afterAll(() => {
+    DateTime.now = origNow;
+  });
 
   test('it generates correct report given an empty list of pull requests', () => {
     const owner = 'Marvel';

@@ -3,17 +3,18 @@ import PullRequestReport from '../../src/reports/pull-request';
 import MERGED_PULL_REQUEST from '../fixtures/merged-pr';
 import OPEN_NO_REVIEWS from '../fixtures/open-no-reviews';
 import OPEN_WITH_REVIEWS from '../fixtures/open-with-reviews';
-import * as td from 'testdouble';
 import { DateTime } from 'luxon';
 
 describe('Pull Request Report', () => {
+  let origNow: any;
   beforeAll(() => {
-    td.replace(DateTime, 'now', () => {
-      return DateTime.fromISO('2021-03-11T17:35:54Z');
-    });
+    origNow = DateTime.now;
+    DateTime.now = () => DateTime.fromISO('2021-03-11T17:35:54Z');
   });
 
-  afterAll(() => td.reset());
+  afterAll(() => {
+    DateTime.now = origNow;
+  });
 
   test('it generates correct report for a merged PR', () => {
     const pullRequest = new PullRequest(
