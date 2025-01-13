@@ -24,7 +24,7 @@
     "@microsoft/api-extractor": "^7.48.1",
     "@octokit/types": "^6.12.2",
     "@pollyjs/adapter-fetch": "^5.1.0",
-    "@pollyjs/adapter-node-http": "^5.1.0",
+    "@pollyjs/adapter-node-http": "^6.0.6",
     "@pollyjs/core": "^5.1.0",
     "@pollyjs/persister-fs": "^5.0.0",
     "@types/debug": "^4.1.5",
