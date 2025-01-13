@@ -6,7 +6,6 @@ import {
 } from '../../src/utils/generate-metrics-from-config';
 import { METRIC_NAME_TO_CONSTRUCTOR } from '../../src/metric';
 import { DateTime } from 'luxon';
-import * as td from 'testdouble';
 
 const NOW_TO_ISO = '2021-03-11T17:35:54.000Z';
 const STUBBED_NOW = DateTime.fromISO(NOW_TO_ISO).toUTC();
@@ -114,7 +113,8 @@ describe('generateMetrics', () => {
   });
 
   test(`period can be specified in config`, () => {
-    td.replace(DateTime, 'utc', () => STUBBED_NOW);
+    let origUtc = DateTime.utc;
+    DateTime.utc = () => STUBBED_NOW;
     try {
       for (let period of ['day', 'week', 'month']) {
         let config = { period, metrics: [{ name: 'workflow/success' }] };
@@ -129,7 +129,7 @@ describe('generateMetrics', () => {
         expect(interval.end).toEqual(STUBBED_NOW);
       }
     } finally {
-      td.reset();
+      DateTime.utc = origUtc;
     }
   });
 

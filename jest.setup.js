@@ -1,6 +1,3 @@
-global.td = require('testdouble');
-require('testdouble-jest')(td, jest);
-
 process.env.GITHUB_OWNER = 'bantic';
 process.env.GITHUB_REPO = 'github-metrics-tests';
 

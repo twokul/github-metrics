@@ -1,16 +1,19 @@
 import { Period, getInterval } from '../../src/utils/date';
-import * as td from 'testdouble';
 import { DateTime } from 'luxon';
 
 const NOW_TO_ISO = '2021-03-11T17:35:54.000Z';
 const STUBBED_NOW = DateTime.fromISO(NOW_TO_ISO).toUTC();
 
 describe('Date Utils', () => {
+  let origUtc: any;
   beforeAll(() => {
-    td.replace(DateTime, 'utc', () => STUBBED_NOW);
+    origUtc = DateTime.utc;
+    DateTime.utc = () => STUBBED_NOW;
   });
 
-  afterAll(() => td.reset());
+  afterAll(() => {
+    DateTime.utc = origUtc;
+  });
 
   test('generates correct date for day', () => {
     const interval = getInterval();
