@@ -19,7 +19,7 @@
   "devDependencies": {
     "@babel/core": "^7",
     "@babel/preset-env": "^7.13.10",
-    "@babel/preset-typescript": "^7.13.0",
+    "@babel/preset-typescript": "^7.26.0",
     "@microsoft/api-documenter": "^7.12.9",
     "@microsoft/api-extractor": "^7.48.1",
     "@octokit/types": "^6.12.2",
@@ -63,7 +63,7 @@
     ]
   },
   "volta": {
-    "node": "16.18.0",
+    "node": "22.13.0",
     "yarn": "1.22.10"
   }
 }
